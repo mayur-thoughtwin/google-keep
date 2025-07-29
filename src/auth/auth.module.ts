@@ -27,4 +27,4 @@ import { GraphQLJwtAuthGuard } from './guards/graphql-jwt-auth.guard';
   controllers: [AuthController],
   exports: [AuthService, GraphQLJwtAuthGuard],
 })
-export class AuthModule {} 
+export class AuthModule {}

@@ -5,6 +5,7 @@ import { Settings } from '../entities/settings.entity';
 import { Note } from '../entities/notes.entity';
 import { Storage } from '../entities/storage.entity';
 import { Label } from '../entities/labels.entity';
+import { DataSource } from 'typeorm';
 
 export const typeOrmConfig = (
   configService: ConfigService,
@@ -16,5 +17,16 @@ export const typeOrmConfig = (
   password: configService.get('DB_PASSWORD') ?? '',
   database: configService.get('DB_NAME') ?? 'postgres',
   entities: [User, Settings, Note, Storage, Label],
-  synchronize: true, // Set to false in production!
+  synchronize: false,
+});
+
+export const AppDataSource = new DataSource({
+  type: 'postgres',
+  host: process.env.DB_HOST || 'localhost',
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USERNAME || 'postgres',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_DATABASE || 'postgres',
+  entities: [User, Settings, Note, Storage, Label],
+  migrations: ['src/migrations/*.ts'],
 });

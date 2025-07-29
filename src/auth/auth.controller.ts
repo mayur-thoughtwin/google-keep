@@ -23,12 +23,13 @@ export class AuthController {
   async googleAuthRedirect(@Req() req: RequestWithUser, @Res() res: Response) {
     const user = req.user;
     const result = await this.authService.login(user);
-    
+
     // Check if frontend URL is configured, otherwise redirect to backend success page
     const frontendUrl = process.env.FRONTEND_URL;
     if (frontendUrl) {
-      const redirectUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
-      res.redirect(redirectUrl);
+      // const redirectUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
+      const redirectUrl1 = `${frontendUrl}/welcome?token=${result.access_token}`;
+      res.redirect(redirectUrl1);
     } else {
       // Redirect to backend success page with token
       const redirectUrl = `http://localhost:3000/auth/success?token=${result.access_token}`;
@@ -43,7 +44,7 @@ export class AuthController {
       message: 'Authentication successful!',
       token: token,
       user: 'User data available with this token',
-      instructions: 'Use this token in Authorization header: Bearer ' + token
+      instructions: 'Use this token in Authorization header: Bearer ' + token,
     };
   }
 
@@ -52,4 +53,4 @@ export class AuthController {
   getProfile(@Req() req: RequestWithUser) {
     return req.user;
   }
-} 
+}

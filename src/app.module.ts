@@ -8,6 +8,7 @@ import { join } from 'path';
 import { UserResolver } from './user/user.resolver';
 import { entities } from './entities';
 import { AuthModule } from './auth/auth.module';
+import { SettingResolver } from './setting/setting.resolver';
 
 @Module({
   imports: [
@@ -27,6 +28,6 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [],
-  providers: [UserResolver],
+  providers: [UserResolver, SettingResolver],
 })
 export class AppModule {}
