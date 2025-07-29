@@ -1,4 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('labels')
 export class Label {
@@ -13,4 +18,4 @@ export class Label {
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
-} 
+}

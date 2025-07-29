@@ -5,8 +5,9 @@ import { typeOrmConfig } from './db/db.config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
-
-import { AppResolver } from './app.resolver';
+import { UserResolver } from './user/user.resolver';
+import { entities } from './entities';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -16,13 +17,16 @@ import { AppResolver } from './app.resolver';
       inject: [ConfigService],
       useFactory: typeOrmConfig,
     }),
+    TypeOrmModule.forFeature(entities),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
+      context: ({ req }) => ({ req }),
     }),
+    AuthModule,
   ],
   controllers: [],
-  providers: [AppResolver],
+  providers: [UserResolver],
 })
 export class AppModule {}

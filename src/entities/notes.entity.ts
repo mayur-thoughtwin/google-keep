@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('notes')
 export class Note {
@@ -6,8 +12,8 @@ export class Note {
   id: number;
 
   @Column()
-  user_id :number
-  
+  user_id: number;
+
   @Column({ length: 100 })
   title: string;
 
@@ -52,4 +58,4 @@ export class Note {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
-} 
+}

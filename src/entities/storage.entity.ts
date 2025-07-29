@@ -1,4 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+} from 'typeorm';
 
 @Entity('storage')
 export class Storage {
@@ -16,4 +21,4 @@ export class Storage {
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
-} 
+}

@@ -6,7 +6,9 @@ import { Note } from '../entities/notes.entity';
 import { Storage } from '../entities/storage.entity';
 import { Label } from '../entities/labels.entity';
 
-export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOptions => ({
+export const typeOrmConfig = (
+  configService: ConfigService,
+): TypeOrmModuleOptions => ({
   type: 'postgres',
   host: configService.get('DB_HOST') ?? 'localhost',
   port: +(configService.get<number>('DB_PORT') ?? 5432),
@@ -15,4 +17,4 @@ export const typeOrmConfig = (configService: ConfigService): TypeOrmModuleOption
   database: configService.get('DB_NAME') ?? 'postgres',
   entities: [User, Settings, Note, Storage, Label],
   synchronize: true, // Set to false in production!
-}); 
+});
