@@ -16,12 +16,32 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type GenericResponse {
+  success: Boolean!
+  message: String!
+  timestamp: String!
+  data: JSONObject
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject
+
 type Query {
   me: User
   users: [User!]!
-  getSettings: String!
+  getSettings: GenericResponse!
 }
 
 type Mutation {
-  updateSettings(newSettings: String!): String!
+  updateSettings(settings: UpdateSettingsInput!): GenericResponse!
+}
+
+input UpdateSettingsInput {
+  is_new_item_at_bottom: Boolean!
+  is_display_rich: Boolean!
+  is_checked_item_at_bottom: Boolean!
+  is_dark_theme: Boolean!
+  is_sharing: Boolean!
 }

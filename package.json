@@ -37,6 +37,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "apollo-server-express": "^3.13.0",
     "graphql": "^16.11.0",
+    "graphql-type-json": "^0.3.2",
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
