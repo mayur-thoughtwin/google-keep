@@ -18,11 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ormconfig.js",
-    "migration:generate": "npm run typeorm -- migration:generate src/migrations/$NAME -p",
-    "migration:run": "npm run typeorm -- migration:run",
-    "migration:revert": "npm run typeorm -- migration:revert",
-    "migration:all": "NAME=AutoMigration npx typeorm-ts-node-commonjs migration:generate src/migrations/$NAME -d src/db/db.config.ts && npx typeorm-ts-node-commonjs migration:run -d src/db/db.config.ts"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:generate": "npm run typeorm -- migration:generate src/migrations/AutoMigration -d src/db/db.config.ts",
+    "migration:run": "npm run typeorm -- migration:run -d src/db/db.config.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d src/db/db.config.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.12.2",

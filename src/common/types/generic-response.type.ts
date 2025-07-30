@@ -1,5 +1,5 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { GraphQLJSONObject } from 'graphql-type-json';
+import GraphQLJSON from 'graphql-type-json';
 
 @ObjectType()
 export class GenericResponse {
@@ -12,6 +12,6 @@ export class GenericResponse {
   @Field()
   timestamp: string;
 
-  @Field(() => GraphQLJSONObject, { nullable: true })
+  @Field(() => GraphQLJSON, { nullable: true })
   data?: Record<string, any>;
 }

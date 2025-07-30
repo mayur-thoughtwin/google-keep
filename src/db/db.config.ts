@@ -6,7 +6,9 @@ import { Note } from '../entities/notes.entity';
 import { Storage } from '../entities/storage.entity';
 import { Label } from '../entities/labels.entity';
 import { DataSource } from 'typeorm';
-
+import { NoteLabels } from 'src/entities/note.labels.entity';
+import * as dotenv from 'dotenv';
+dotenv.config();
 export const typeOrmConfig = (
   configService: ConfigService,
 ): TypeOrmModuleOptions => ({
@@ -16,8 +18,8 @@ export const typeOrmConfig = (
   username: configService.get('DB_USERNAME') ?? 'postgres',
   password: configService.get('DB_PASSWORD') ?? '',
   database: configService.get('DB_NAME') ?? 'postgres',
-  entities: [User, Settings, Note, Storage, Label],
-  synchronize: false,
+  entities: [User, Settings, Note, Storage, Label, NoteLabels],
+  synchronize: true,
 });
 
 export const AppDataSource = new DataSource({
@@ -27,6 +29,6 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'postgres',
-  entities: [User, Settings, Note, Storage, Label],
+  entities: [User, Settings, Note, Storage, Label, NoteLabels],
   migrations: ['src/migrations/*.ts'],
 });

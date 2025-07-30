@@ -5,16 +5,16 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
-@Entity('labels')
-export class Label {
+@Entity('note_labels')
+export class NoteLabels {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  name: string;
+  note_id: number;
 
-  @Column({ length: 50 })
-  description: string;
+  @Column()
+  label_id: number;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;
