@@ -33,13 +33,18 @@ type Query {
   users: [User!]!
   getSettings: GenericResponse!
   getNotes: GenericResponse!
+  getLabels: GenericResponse!
 }
 
 type Mutation {
   updateSettings(settings: UpdateSettingsInput!): GenericResponse!
   addNotes(notes: AddNotesInput!): GenericResponse!
-  updateNote(noteId: Float!, data: AddNotesInput!): GenericResponse!
+  updateNote(noteId: Float!, data: UpdateNotesInput!): GenericResponse!
   deleteNote(noteId: Float!): GenericResponse!
+  archiveNote(input: ArchiveNoteInput!): GenericResponse!
+  addLabel(label: AddLabelInput!): GenericResponse!
+  updateLabel(labelId: Float!, data: AddLabelInput!): GenericResponse!
+  deleteLabel(labelId: Float!): GenericResponse!
 }
 
 input UpdateSettingsInput {
@@ -57,6 +62,22 @@ input AddNotesInput {
   bg_image: String
   is_archived: Boolean! = false
   archived_at: DateTime
+  is_edited: Boolean! = false
+  edited_at: DateTime
+  is_reminder: Boolean! = false
+  reminder_at: DateTime
+  latitude: Float
+  longitude: Float
+  deleted_at: DateTime
+}
+
+input UpdateNotesInput {
+  title: String
+  description: String
+  bg_color: String
+  bg_image: String
+  is_archived: Boolean
+  archived_at: DateTime
   is_edited: Boolean
   edited_at: DateTime
   is_reminder: Boolean
@@ -64,4 +85,12 @@ input AddNotesInput {
   latitude: Float
   longitude: Float
   deleted_at: DateTime
+}
+
+input ArchiveNoteInput {
+  noteId: Float!
+}
+
+input AddLabelInput {
+  name: String!
 }

@@ -1,10 +1,8 @@
-// src/modules/notes/notes.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from 'src/entities/notes.entity';
 import { Repository } from 'typeorm';
-import { AddNotesInput } from './notes.type';
+import { AddNotesInput, UpdateNotesInput } from './notes.type';
 
 @Injectable()
 export class NotesService {
@@ -25,19 +23,43 @@ export class NotesService {
   async updateNote(
     noteId: number,
     userId: number,
-    data: Partial<AddNotesInput>,
+    data: UpdateNotesInput,
   ): Promise<Note | null> {
     const note = await this.noteRepo.findOne({
       where: { id: noteId, user_id: userId },
     });
+
     if (!note) return null;
 
-    Object.assign(note, data);
+    const updateData = { ...data };
+    updateData.is_edited = true;
+    updateData.edited_at = new Date();
+
+    Object.assign(note, updateData);
+
     return this.noteRepo.save(note);
   }
 
   async deleteNote(userId: number, noteId: number): Promise<string> {
     await this.noteRepo.delete({ user_id: userId, id: noteId });
     return 'true';
+  }
+
+  async toggleArchiveStatus(
+    noteId: number,
+    userId: number,
+  ): Promise<Note | null> {
+    const note = await this.noteRepo.findOne({
+      where: { id: noteId, user_id: userId },
+    });
+    if (!note) return null;
+    if (note.is_archived == true) {
+      note.is_archived = false;
+      note.archived_at = null;
+    } else {
+      note.is_archived = true;
+      note.archived_at = new Date();
+    }
+    return this.noteRepo.save(note);
   }
 }

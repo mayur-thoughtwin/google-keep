@@ -11,10 +11,10 @@ export class Label {
   id: number;
 
   @Column()
-  name: string;
+  user_id: number;
 
-  @Column({ length: 50 })
-  description: string;
+  @Column()
+  name: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

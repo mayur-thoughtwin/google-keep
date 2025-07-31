@@ -20,6 +20,53 @@ export class AddNotesInput {
   @Field({ nullable: true })
   archived_at?: Date;
 
+  @Field({ defaultValue: false })
+  is_edited: boolean;
+
+  @Field({ nullable: true })
+  edited_at?: Date;
+
+  @Field({ defaultValue: false })
+  is_reminder: boolean;
+
+  @Field({ nullable: true })
+  reminder_at?: Date;
+
+  @Field({ nullable: true })
+  latitude?: number;
+
+  @Field({ nullable: true })
+  longitude?: number;
+
+  @Field({ nullable: true })
+  deleted_at?: Date;
+}
+@InputType()
+export class ArchiveNoteInput {
+  @Field()
+  noteId: number;
+}
+
+@InputType()
+export class UpdateNotesInput {
+  @Field({ nullable: true })
+  title?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field({ nullable: true })
+  bg_color?: string;
+
+  @Field({ nullable: true })
+  bg_image?: string;
+
+  @Field({ nullable: true })
+  is_archived?: boolean;
+
+  @Field({ nullable: true })
+  archived_at?: Date;
+
   @Field({ nullable: true })
   is_edited: boolean;
 
@@ -27,7 +74,7 @@ export class AddNotesInput {
   edited_at?: Date;
 
   @Field({ nullable: true })
-  is_reminder: boolean;
+  is_reminder?: boolean;
 
   @Field({ nullable: true })
   reminder_at?: Date;

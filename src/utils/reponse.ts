@@ -1,18 +1,33 @@
-// utils/responseHandler.ts
+// export const handleResponse = ({
+//   success,
+//   message,
+//   data = null,
+// }: {
+//   success: boolean;
+//   message: string | Error;
+//   data?: any;
+// }) => {
+//   return {
+//     success,
+//     message: typeof message === 'string' ? message : message.message,
+//     timestamp: new Date().toISOString(),
+//     data,
+//   };
+// };
 
-export function handleResponse({
-  success = true,
-  message = '',
-  data = null,
+export const handleResponse = ({
+  success,
+  message,
+  data,
 }: {
-  success?: boolean;
-  message?: string;
+  success: boolean;
+  message: string | Error;
   data?: any;
-}) {
+}) => {
   return {
     success,
-    message,
+    message: typeof message === 'string' ? message : message.message,
     timestamp: new Date().toISOString(),
-    data,
+    ...(data !== undefined && data !== null && { data }),
   };
-}
+};

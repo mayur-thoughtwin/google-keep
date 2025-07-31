@@ -10,6 +10,7 @@ import { entities } from './entities';
 import { AuthModule } from './auth/auth.module';
 import { SettingModule } from './setting/setting.module';
 import { NotesModule } from './notes/notes.module';
+import { LabelsModule } from './labels/label.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { NotesModule } from './notes/notes.module';
     AuthModule,
     SettingModule,
     NotesModule,
+    LabelsModule,
   ],
   controllers: [],
   providers: [UserResolver],

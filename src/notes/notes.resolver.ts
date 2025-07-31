@@ -2,7 +2,11 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
 import { Note } from 'src/entities/notes.entity';
-import { AddNotesInput } from './notes.type';
+import {
+  AddNotesInput,
+  ArchiveNoteInput,
+  UpdateNotesInput,
+} from './notes.type';
 import { NotesService } from './notes.service';
 import { GenericResponse } from 'src/common/types/generic-response.type';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -60,7 +64,7 @@ export class NotesResolver {
   @UseGuards(GraphQLJwtAuthGuard)
   async updateNote(
     @Args('noteId') noteId: number,
-    @Args('data') data: AddNotesInput,
+    @Args('data') data: UpdateNotesInput,
     @CurrentUser() user: any,
   ) {
     try {
@@ -118,4 +122,63 @@ export class NotesResolver {
       });
     }
   }
+
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async archiveNote(
+    @Args('input') input: ArchiveNoteInput,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const updated = await this.notesService.toggleArchiveStatus(
+        input.noteId,
+        user.userId as number,
+      );
+
+      if (!updated) {
+        return handleResponse({
+          success: false,
+          message: 'Note not found',
+          data: null,
+        });
+      }
+
+      return handleResponse({
+        success: true,
+        message: updated.is_archived ? 'Note archived' : 'Note unarchived',
+        data: updated,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to toggle archive status',
+        data: error,
+      });
+    }
+  }
+
+  // @Mutation(() => GenericResponse)
+  // @UseGuards(GraphQLJwtAuthGuard)
+  // async getArchiveAndTrashNotes(
+  //   @Args('type') type: string,
+  //   @CurrentUser() user: any,
+  // ): Promise<GenericResponse> {
+  //   try {
+  //     const notes = await this.notesService.getArchivedOrTrashedNotes(
+  //       type,
+  //       user.userId as number,
+  //     );
+
+  //     return handleResponse({
+  //       success: true,
+  //       message: `Fetched ${type} notes successfully`,
+  //       data: notes,
+  //     });
+  //   } catch (error) {
+  //     return handleResponse({
+  //       success: false,
+  //       message: error,
+  //     });
+  //   }
+  // }
 }

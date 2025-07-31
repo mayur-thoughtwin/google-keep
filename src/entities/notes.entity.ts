@@ -29,8 +29,8 @@ export class Note {
   @Column()
   is_archived: boolean;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  archived_at: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  archived_at: Date | null;
 
   @Column()
   is_edited: boolean;
