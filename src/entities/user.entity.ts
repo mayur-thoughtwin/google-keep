@@ -29,7 +29,7 @@ export class User {
   @Column({ nullable: true })
   picture: string;
 
-  @Field()
+  @Field(() => Date, { nullable: true })
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 }

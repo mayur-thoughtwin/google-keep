@@ -16,12 +16,17 @@ export class UserResolver {
   @Query(() => User, { nullable: true })
   @UseGuards(GraphQLJwtAuthGuard)
   async me(@CurrentUser() user: any): Promise<User | null> {
-    return this.userRepository.findOne({ where: { id: user.userId } });
+    return this.userRepository.findOne({
+      where: { id: user.userId },
+      select: ['id', 'name', 'email'],
+    });
   }
 
   @Query(() => [User])
   @UseGuards(GraphQLJwtAuthGuard)
   async users(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.userRepository.find({
+      select: ['id', 'name', 'email'],
+    });
   }
 }

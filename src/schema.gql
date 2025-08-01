@@ -8,7 +8,7 @@ type User {
   googleId: String
   name: String
   picture: String
-  createdAt: DateTime!
+  createdAt: DateTime
 }
 
 """
@@ -33,6 +33,8 @@ type Query {
   users: [User!]!
   getSettings: GenericResponse!
   getNotes: GenericResponse!
+  getArchiveOrTrashNotesOrReminder(type: String!): GenericResponse!
+  searchNotes(query: String!): GenericResponse!
   getLabels: GenericResponse!
 }
 
@@ -42,6 +44,9 @@ type Mutation {
   updateNote(noteId: Float!, data: UpdateNotesInput!): GenericResponse!
   deleteNote(noteId: Float!): GenericResponse!
   archiveNote(input: ArchiveNoteInput!): GenericResponse!
+  restoreNote(noteId: Float!): GenericResponse!
+  setReminder(noteId: Float!, reminderAt: DateTime): GenericResponse!
+  emptyTrash: GenericResponse!
   addLabel(label: AddLabelInput!): GenericResponse!
   updateLabel(labelId: Float!, data: AddLabelInput!): GenericResponse!
   deleteLabel(labelId: Float!): GenericResponse!

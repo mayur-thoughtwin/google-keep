@@ -96,12 +96,16 @@ export class NotesResolver {
 
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
-  async deleteNote(@Args('noteId') noteId: number, @CurrentUser() user: any) {
+  async deleteNote(
+    @Args('noteId') noteId: number,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
     try {
       const success = await this.notesService.deleteNote(
         user.userId as number,
         noteId,
       );
+
       if (!success) {
         return handleResponse({
           success: false,
@@ -109,6 +113,7 @@ export class NotesResolver {
           data: null,
         });
       }
+
       return handleResponse({
         success: true,
         message: 'Note deleted',
@@ -118,7 +123,7 @@ export class NotesResolver {
       return handleResponse({
         success: false,
         message: 'Failed to delete note',
-        data: error,
+        data: error.message ?? error,
       });
     }
   }
@@ -157,28 +162,155 @@ export class NotesResolver {
     }
   }
 
-  // @Mutation(() => GenericResponse)
-  // @UseGuards(GraphQLJwtAuthGuard)
-  // async getArchiveAndTrashNotes(
-  //   @Args('type') type: string,
-  //   @CurrentUser() user: any,
-  // ): Promise<GenericResponse> {
-  //   try {
-  //     const notes = await this.notesService.getArchivedOrTrashedNotes(
-  //       type,
-  //       user.userId as number,
-  //     );
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async restoreNote(
+    @Args('noteId') noteId: number,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const success = await this.notesService.restoreNote(
+        user.userId as number,
+        noteId,
+      );
 
-  //     return handleResponse({
-  //       success: true,
-  //       message: `Fetched ${type} notes successfully`,
-  //       data: notes,
-  //     });
-  //   } catch (error) {
-  //     return handleResponse({
-  //       success: false,
-  //       message: error,
-  //     });
-  //   }
-  // }
+      if (!success) {
+        return handleResponse({
+          success: false,
+          message: 'Note not found or already active',
+          data: null,
+        });
+      }
+
+      return handleResponse({
+        success: true,
+        message: 'Note restored successfully',
+        data: null,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to restore note',
+        data: error.message ?? error,
+      });
+    }
+  }
+
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async setReminder(
+    @Args('noteId') noteId: number,
+    @Args('reminderAt', { type: () => Date, nullable: true }) reminderAt: Date,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const updatedNote = await this.notesService.setReminder(
+        user.userId as number,
+        noteId,
+        reminderAt ?? null,
+      );
+
+      if (!updatedNote) {
+        return handleResponse({
+          success: false,
+          message: 'Note not found or already deleted',
+          data: null,
+        });
+      }
+
+      return handleResponse({
+        success: true,
+        message: reminderAt ? 'Reminder set successfully' : 'Reminder removed',
+        data: updatedNote,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to update reminder',
+        data: error.message,
+      });
+    }
+  }
+
+  @Query(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async getArchiveOrTrashNotesOrReminder(
+    @Args('type') type: string,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const notes = await this.notesService.getArchivedOrTrashedNotesOrReminder(
+        type,
+        user.userId as number,
+      );
+
+      return handleResponse({
+        success: true,
+        message: `Fetched ${type} notes successfully`,
+        data: notes,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to fetch notes',
+        data: error.message ?? error,
+      });
+    }
+  }
+
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async emptyTrash(@CurrentUser() user: any): Promise<GenericResponse> {
+    try {
+      const deletedCount = await this.notesService.emptyTrash(
+        user.userId as number,
+      );
+
+      if (deletedCount === 0) {
+        return handleResponse({
+          success: true,
+          message: 'Trash is already empty',
+          data: null,
+        });
+      }
+
+      return handleResponse({
+        success: true,
+        message: `Permanently deleted ${deletedCount} notes from trash`,
+        data: deletedCount,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to empty trash',
+        data: error.message,
+      });
+    }
+  }
+
+  @Query(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async searchNotes(
+    @Args('query') query: string,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const notes = await this.notesService.searchNotes(
+        user.userId as number,
+        query,
+      );
+
+      return handleResponse({
+        success: true,
+        message: 'Search results fetched',
+        data: notes,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Search failed',
+        data: error.message,
+      });
+    }
+  }
 }

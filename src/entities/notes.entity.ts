@@ -42,7 +42,7 @@ export class Note {
   is_reminder: boolean;
 
   @Column({ type: 'timestamptz', nullable: true })
-  reminder_at: Date;
+  reminder_at: Date | null;
 
   @Column('float', { nullable: true })
   latitude: number;
@@ -51,7 +51,7 @@ export class Note {
   longitude: number;
 
   @Column({ type: 'timestamptz', nullable: true })
-  deleted_at: Date;
+  deleted_at: Date | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date;

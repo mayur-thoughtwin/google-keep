@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from 'src/entities/notes.entity';
-import { Repository } from 'typeorm';
+import { ILike, IsNull, Not, Repository } from 'typeorm';
 import { AddNotesInput, UpdateNotesInput } from './notes.type';
 
 @Injectable()
@@ -40,9 +40,26 @@ export class NotesService {
     return this.noteRepo.save(note);
   }
 
-  async deleteNote(userId: number, noteId: number): Promise<string> {
-    await this.noteRepo.delete({ user_id: userId, id: noteId });
-    return 'true';
+  async deleteNote(userId: number, noteId: number): Promise<boolean> {
+    const result = await this.noteRepo.update(
+      { id: noteId },
+      { deleted_at: new Date() },
+    );
+
+    if (typeof result.affected === 'number' && result.affected > 0) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async restoreNote(userId: number, noteId: number): Promise<boolean> {
+    const result = await this.noteRepo.update(
+      { user_id: userId, id: noteId },
+      { deleted_at: null },
+    );
+
+    return typeof result.affected === 'number' && result.affected > 0;
   }
 
   async toggleArchiveStatus(
@@ -61,5 +78,95 @@ export class NotesService {
       note.archived_at = new Date();
     }
     return this.noteRepo.save(note);
+  }
+
+  async setReminder(
+    userId: number,
+    noteId: number,
+    reminderAt: Date | null,
+  ): Promise<Note | null> {
+    const note = await this.noteRepo.findOne({
+      where: { id: noteId, user_id: userId, deleted_at: IsNull() },
+    });
+
+    if (!note) return null;
+
+    note.is_reminder = !!reminderAt;
+    note.reminder_at = reminderAt;
+
+    return await this.noteRepo.save(note);
+  }
+
+  async getArchivedOrTrashedNotesOrReminder(
+    type: string,
+    userId: number,
+  ): Promise<Note[]> {
+    if (type === 'archive') {
+      return await this.noteRepo.find({
+        where: {
+          user_id: userId,
+          is_archived: true,
+          deleted_at: IsNull(),
+        },
+        order: { updated_at: 'DESC' },
+      });
+    }
+
+    if (type === 'trash') {
+      return await this.noteRepo.find({
+        where: {
+          user_id: userId,
+          deleted_at: Not(IsNull()),
+        },
+        order: { deleted_at: 'DESC' },
+      });
+    }
+    if (type === 'reminder') {
+      return await this.noteRepo.find({
+        where: {
+          user_id: userId,
+          is_reminder: true,
+          reminder_at: Not(IsNull()),
+          deleted_at: IsNull(),
+        },
+        order: { reminder_at: 'ASC' },
+      });
+    }
+
+    throw new Error('Invalid type. Expected "archive" or "trash".');
+  }
+
+  async emptyTrash(userId: number): Promise<number> {
+    const trashedNotes = await this.noteRepo.find({
+      where: {
+        user_id: userId,
+        deleted_at: Not(IsNull()),
+      },
+    });
+
+    const noteIds = trashedNotes.map((note) => note.id);
+
+    if (noteIds.length === 0) return 0;
+
+    const result = await this.noteRepo.delete(noteIds);
+    return result.affected ?? 0;
+  }
+
+  async searchNotes(userId: number, query: string): Promise<Note[]> {
+    return await this.noteRepo.find({
+      where: [
+        {
+          user_id: userId,
+          deleted_at: IsNull(),
+          title: ILike(`%${query}%`),
+        },
+        {
+          user_id: userId,
+          deleted_at: IsNull(),
+          description: ILike(`%${query}%`),
+        },
+      ],
+      order: { updated_at: 'DESC' },
+    });
   }
 }
