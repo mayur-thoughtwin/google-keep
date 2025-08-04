@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { SettingModule } from './setting/setting.module';
 import { NotesModule } from './notes/notes.module';
 import { LabelsModule } from './labels/label.module';
+import { FileUploadService } from './common/utils/file-upload.service';
 
 @Module({
   imports: [
@@ -26,13 +28,13 @@ import { LabelsModule } from './labels/label.module';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       context: ({ req }) => ({ req }),
-    }),
+    } as any),
     AuthModule,
     SettingModule,
     NotesModule,
     LabelsModule,
   ],
   controllers: [],
-  providers: [UserResolver],
+  providers: [UserResolver, FileUploadService],
 })
 export class AppModule {}

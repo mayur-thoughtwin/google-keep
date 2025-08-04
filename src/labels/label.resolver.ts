@@ -4,7 +4,7 @@ import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
 import { Label } from 'src/entities/labels.entity';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { GenericResponse } from 'src/common/types/generic-response.type';
-import { handleResponse } from 'src/utils/reponse';
+import { handleResponse } from 'src/common/utils/reponse';
 import { AddLabelInput } from './label.type';
 import { LabelsService } from './label.service';
 

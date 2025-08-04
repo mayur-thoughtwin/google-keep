@@ -1,5 +1,5 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { handleResponse } from 'src/utils/reponse';
+import { handleResponse } from 'src/common/utils/reponse';
 import { UpdateSettingsInput } from './setting.type';
 import { GenericResponse } from 'src/common/types/generic-response.type';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';

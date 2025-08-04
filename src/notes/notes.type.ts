@@ -5,14 +5,16 @@ import {
   IsBoolean,
   IsDate,
   IsNumber,
+  Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 @InputType()
 export class AddNotesInput {
-  @Field()
+  @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
+  @Length(1, 5, { message: 'Title must be between 1 and 5 characters long' })
   title?: string;
 
   @Field()
@@ -24,7 +26,7 @@ export class AddNotesInput {
   @IsString()
   bg_color?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   bg_image?: string;

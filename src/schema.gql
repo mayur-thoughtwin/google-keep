@@ -53,15 +53,15 @@ type Mutation {
 }
 
 input UpdateSettingsInput {
-  is_new_item_at_bottom: Boolean!
-  is_display_rich: Boolean!
-  is_checked_item_at_bottom: Boolean!
-  is_dark_theme: Boolean!
-  is_sharing: Boolean!
+  is_new_item_at_bottom: Boolean
+  is_display_rich: Boolean
+  is_checked_item_at_bottom: Boolean
+  is_dark_theme: Boolean
+  is_sharing: Boolean
 }
 
 input AddNotesInput {
-  title: String!
+  title: String
   description: String!
   bg_color: String
   bg_image: String
