@@ -12,7 +12,6 @@ import { AuthModule } from './auth/auth.module';
 import { SettingModule } from './setting/setting.module';
 import { NotesModule } from './notes/notes.module';
 import { LabelsModule } from './labels/label.module';
-import { FileUploadService } from './common/utils/file-upload.service';
 
 @Module({
   imports: [
@@ -35,6 +34,6 @@ import { FileUploadService } from './common/utils/file-upload.service';
     LabelsModule,
   ],
   controllers: [],
-  providers: [UserResolver, FileUploadService],
+  providers: [UserResolver],
 })
 export class AppModule {}

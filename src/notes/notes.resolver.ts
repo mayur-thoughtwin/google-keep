@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Query, Scalar } from '@nestjs/graphql';
+import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
 import { Note } from 'src/entities/notes.entity';
@@ -11,18 +11,11 @@ import { NotesService } from './notes.service';
 import { GenericResponse } from 'src/common/types/generic-response.type';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { handleResponse } from 'src/common/utils/reponse';
-import { FileUploadService } from '../common/utils/file-upload.service';
-import { GraphQLScalarType } from 'graphql';
-const GraphQLUploadScalar = new GraphQLScalarType({
-  name: 'Upload',
-  description: 'The `Upload` scalar type represents a file upload.',
-});
 
 @Resolver(() => Note)
 export class NotesResolver {
   constructor(
     private readonly notesService: NotesService,
-    private readonly fileUploadService: FileUploadService,
   ) {}
 
   @Mutation(() => GenericResponse)
