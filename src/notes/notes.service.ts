@@ -3,19 +3,57 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from 'src/entities/notes.entity';
 import { ILike, IsNull, Not, Repository } from 'typeorm';
 import { AddNotesInput, UpdateNotesInput } from './notes.type';
-
+import { createWriteStream, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
 @Injectable()
 export class NotesService {
   constructor(
     @InjectRepository(Note)
     private readonly noteRepo: Repository<Note>,
-  ) {}
+  ) { }
 
-  async createNote(userId: number, input: AddNotesInput): Promise<Note> {
-    const note = this.noteRepo.create({ ...input, user_id: userId });
-    return await this.noteRepo.save(note);
-  }
+  // async createNote(userId: number, input: AddNotesInput): Promise<Note> {
+  //   const note = this.noteRepo.create({ ...input, user_id: userId });
+  //   return await this.noteRepo.save(note);
+  // }
+  // async create(createNoteInput: AddNotesInput, userId: number): Promise<Note> {
+  //   const { file, ...noteData } = createNoteInput;
+    
+  //   if (file) {
+  //     const { createReadStream, filename } = await file;
 
+  //     const uploadsDir = join(__dirname, '..', '..', 'uploads');
+  //     if (!existsSync(uploadsDir)) {
+  //       mkdirSync(uploadsDir);
+  //     }
+
+  //     const filePath = join(uploadsDir, filename);
+  //     const stream = createReadStream();
+  //     await new Promise((resolve, reject) => {
+  //       stream
+  //         .pipe(createWriteStream(filePath))
+  //         .on('finish', resolve)
+  //         .on('error', reject);
+  //     });
+
+  //     noteData.bg_image = `uploads/${filename}`;
+  //   }
+
+  //   const note = this.noteRepo.create({
+  //     title: noteData.title,
+  //     description: noteData.description,
+  //     bg_color: noteData.bg_color,
+  //     bg_image: noteData.bg_image,
+  //     is_archived: noteData.is_archived,
+  //     is_edited: noteData.is_edited,
+  //     is_reminder: noteData.is_reminder,
+  //     latitude: noteData.latitude,
+  //     longitude: noteData.longitude,
+  //     user_id: userId,
+  //   });
+
+  //   return this.noteRepo.save(note);
+  // }
   async getNotes(userId: number): Promise<Note[]> {
     return this.noteRepo.find({ where: { user_id: userId } });
   }

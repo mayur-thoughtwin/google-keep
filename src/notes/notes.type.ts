@@ -8,14 +8,36 @@ import {
   Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
+// import { Upload, UploadScalar } from '../common/scalar/upload.scalar';
+
 
 @InputType()
 export class AddNotesInput {
+  // @Field(() => GraphQLUpload)
+  // file: Promise<FileUpload>;
+
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()
   @Length(1, 5, { message: 'Title must be between 1 and 5 characters long' })
   title?: string;
+}
+
+@InputType()
+export class AddNotesInput1 {
+  @Field(() => String, { nullable: true })
+  @IsString()
+  @IsOptional()
+  @Length(1, 5, { message: 'Title must be between 1 and 5 characters long' })
+  title?: string;
+
+  // @Field(() => UploadScalar, { nullable: true })
+  // file: any;
+
+
+  // @Field(() => GraphQLUpload)
+  // file: Promise<FileUpload>;
 
   @Field()
   @IsString()
@@ -35,31 +57,31 @@ export class AddNotesInput {
   @IsBoolean()
   is_archived: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  archived_at?: Date;
+  archived_at?: Date | null;
 
   @Field({ defaultValue: false })
   @IsBoolean()
   is_edited: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  edited_at?: Date;
+  edited_at?: Date | null;
 
   @Field({ defaultValue: false })
   @IsBoolean()
   is_reminder: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  reminder_at?: Date;
+  reminder_at?: Date | null;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -71,11 +93,11 @@ export class AddNotesInput {
   @IsNumber()
   longitude?: number;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  deleted_at?: Date;
+  deleted_at?: Date | null;
 }
 
 @InputType()
@@ -107,38 +129,38 @@ export class UpdateNotesInput {
   @IsString()
   bg_image?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @IsBoolean()
   is_archived?: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  archived_at?: Date;
+  archived_at?: Date | null;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
   is_edited?: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  edited_at?: Date;
+  edited_at?: Date | null;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
   is_reminder?: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  reminder_at?: Date;
+  reminder_at?: Date | null;
 
   @Field({ nullable: true })
   @IsOptional()
@@ -150,11 +172,11 @@ export class UpdateNotesInput {
   @IsNumber()
   longitude?: number;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  deleted_at?: Date;
+  deleted_at?: Date | null;
 }
 
 @InputType()
@@ -167,5 +189,5 @@ export class SetReminderInput {
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  reminder_at?: Date;
+  reminder_at?: Date | null;
 }

@@ -12,6 +12,8 @@ import { AuthModule } from './auth/auth.module';
 import { SettingModule } from './setting/setting.module';
 import { NotesModule } from './notes/notes.module';
 import { LabelsModule } from './labels/label.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+// import { Upload, UploadScalar } from './common/scalar/upload.scalar';
 
 @Module({
   imports: [
@@ -25,9 +27,18 @@ import { LabelsModule } from './labels/label.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      // uploads: {
+      //   maxFileSize: 10000000, // 10 MB
+      //   maxFiles: 1,
+      // },
+      uploads: false,
       playground: true,
       context: ({ req }) => ({ req }),
     } as any),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     AuthModule,
     SettingModule,
     NotesModule,

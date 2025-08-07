@@ -12,13 +12,18 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(googleId: string, email: string, name: string, picture: string): Promise<User> {
+  async validateUser(
+    googleId: string,
+    email: string,
+    name: string,
+    picture: string,
+  ): Promise<User> {
     let user = await this.userRepository.findOne({ where: { googleId } });
 
     if (!user) {
       // Check if user exists with email but no googleId
       user = await this.userRepository.findOne({ where: { email } });
-      
+
       if (user) {
         // Link existing user to Google account
         user.googleId = googleId;
@@ -33,7 +38,7 @@ export class AuthService {
           picture,
         });
       }
-      
+
       await this.userRepository.save(user);
     }
 
@@ -56,4 +61,4 @@ export class AuthService {
   async findUserById(id: number): Promise<User | null> {
     return this.userRepository.findOne({ where: { id } });
   }
-} 
+}

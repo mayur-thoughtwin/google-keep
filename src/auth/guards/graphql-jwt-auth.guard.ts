@@ -8,4 +8,4 @@ export class GraphQLJwtAuthGuard extends AuthGuard('jwt') {
     const ctx = GqlExecutionContext.create(context);
     return ctx.getContext().req;
   }
-} 
+}

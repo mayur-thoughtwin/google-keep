@@ -40,7 +40,7 @@ type Query {
 
 type Mutation {
   updateSettings(settings: UpdateSettingsInput!): GenericResponse!
-  addNotes(notes: AddNotesInput!): GenericResponse!
+  createNote(createNoteInput: AddNotesInput!, file: Upload!): GenericResponse!
   updateNote(noteId: Float!, data: UpdateNotesInput!): GenericResponse!
   deleteNote(noteId: Float!): GenericResponse!
   archiveNote(input: ArchiveNoteInput!): GenericResponse!
@@ -62,26 +62,17 @@ input UpdateSettingsInput {
 
 input AddNotesInput {
   title: String
-  description: String!
-  bg_color: String
-  bg_image: String
-  is_archived: Boolean! = false
-  archived_at: DateTime
-  is_edited: Boolean! = false
-  edited_at: DateTime
-  is_reminder: Boolean! = false
-  reminder_at: DateTime
-  latitude: Float
-  longitude: Float
-  deleted_at: DateTime
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 input UpdateNotesInput {
   title: String
   description: String
   bg_color: String
   bg_image: String
-  is_archived: Boolean
+  is_archived: DateTime
   archived_at: DateTime
   is_edited: Boolean
   edited_at: DateTime
