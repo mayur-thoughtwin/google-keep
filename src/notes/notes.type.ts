@@ -12,20 +12,9 @@ import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 // import { Upload, UploadScalar } from '../common/scalar/upload.scalar';
 
 
+
 @InputType()
 export class AddNotesInput {
-  // @Field(() => GraphQLUpload)
-  // file: Promise<FileUpload>;
-
-  @Field(() => String, { nullable: true })
-  @IsString()
-  @IsOptional()
-  @Length(1, 5, { message: 'Title must be between 1 and 5 characters long' })
-  title?: string;
-}
-
-@InputType()
-export class AddNotesInput1 {
   @Field(() => String, { nullable: true })
   @IsString()
   @IsOptional()

@@ -1,59 +1,49 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from 'src/entities/notes.entity';
-import { ILike, IsNull, Not, Repository } from 'typeorm';
+import { ILike, IsNull, LessThan, Not, Repository } from 'typeorm';
 import { AddNotesInput, UpdateNotesInput } from './notes.type';
 import { createWriteStream, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
+import { Cron, CronExpression } from '@nestjs/schedule';
 @Injectable()
 export class NotesService {
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  handleCron() {
+    console.log('Called when the current second is 45', new Date());
+  }
   constructor(
     @InjectRepository(Note)
     private readonly noteRepo: Repository<Note>,
-  ) { }
+  ) {}
 
   // async createNote(userId: number, input: AddNotesInput): Promise<Note> {
   //   const note = this.noteRepo.create({ ...input, user_id: userId });
   //   return await this.noteRepo.save(note);
   // }
-  // async create(createNoteInput: AddNotesInput, userId: number): Promise<Note> {
-  //   const { file, ...noteData } = createNoteInput;
-    
-  //   if (file) {
-  //     const { createReadStream, filename } = await file;
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async autoEmptyTrash() {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  //     const uploadsDir = join(__dirname, '..', '..', 'uploads');
-  //     if (!existsSync(uploadsDir)) {
-  //       mkdirSync(uploadsDir);
-  //     }
+    const result = await this.noteRepo.delete({
+      deleted_at: LessThan(sevenDaysAgo),
+    });
 
-  //     const filePath = join(uploadsDir, filename);
-  //     const stream = createReadStream();
-  //     await new Promise((resolve, reject) => {
-  //       stream
-  //         .pipe(createWriteStream(filePath))
-  //         .on('finish', resolve)
-  //         .on('error', reject);
-  //     });
+    if (result.affected && result.affected > 0) {
+      console.log(`${result.affected} notes permanently deleted`);
+    }
+  }
+  async createNote(userId: number, input: AddNotesInput, savePath: string) {
+    const note = this.noteRepo.create({
+      ...input,
+      user_id: userId,
+      bg_image: savePath,
+    });
+    return await this.noteRepo.save(note);
+  }
 
-  //     noteData.bg_image = `uploads/${filename}`;
-  //   }
-
-  //   const note = this.noteRepo.create({
-  //     title: noteData.title,
-  //     description: noteData.description,
-  //     bg_color: noteData.bg_color,
-  //     bg_image: noteData.bg_image,
-  //     is_archived: noteData.is_archived,
-  //     is_edited: noteData.is_edited,
-  //     is_reminder: noteData.is_reminder,
-  //     latitude: noteData.latitude,
-  //     longitude: noteData.longitude,
-  //     user_id: userId,
-  //   });
-
-  //   return this.noteRepo.save(note);
-  // }
   async getNotes(userId: number): Promise<Note[]> {
     return this.noteRepo.find({ where: { user_id: userId } });
   }

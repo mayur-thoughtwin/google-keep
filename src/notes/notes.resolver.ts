@@ -15,6 +15,9 @@ import { handleResponse } from 'src/common/utils/reponse';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 import { createWriteStream } from 'fs';
 import { join } from 'path';
+import { Cron } from '@nestjs/schedule';
+
+
 
 @Resolver(() => Note)
 export class NotesResolver {
@@ -65,6 +68,8 @@ export class NotesResolver {
     // Debug logs (optional)
     console.log('Saved:', savePath);
     console.log('User:', user);
+
+    const created = await this.notesService.createNote(user.userId as number, createNoteInput, savePath);
 
     return handleResponse({
       success: true,

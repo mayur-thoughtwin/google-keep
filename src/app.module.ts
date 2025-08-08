@@ -13,10 +13,12 @@ import { SettingModule } from './setting/setting.module';
 import { NotesModule } from './notes/notes.module';
 import { LabelsModule } from './labels/label.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { ScheduleModule } from '@nestjs/schedule';
 // import { Upload, UploadScalar } from './common/scalar/upload.scalar';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
