@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/await-thenable */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +8,7 @@ import { AddNotesInput, UpdateNotesInput } from './notes.type';
 import { createWriteStream, mkdirSync, existsSync } from 'fs';
 import { join } from 'path';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Storage } from 'src/entities/storage.entity';
 @Injectable()
 export class NotesService {
   @Cron(CronExpression.EVERY_5_SECONDS)
@@ -16,6 +18,8 @@ export class NotesService {
   constructor(
     @InjectRepository(Note)
     private readonly noteRepo: Repository<Note>,
+    @InjectRepository(Storage)
+    private readonly storageRepo: Repository<Storage>,
   ) {}
 
   // async createNote(userId: number, input: AddNotesInput): Promise<Note> {
@@ -42,6 +46,15 @@ export class NotesService {
       bg_image: savePath,
     });
     return await this.noteRepo.save(note);
+  }
+
+  async addFiles(ref_id: number, type: string, url: string) {
+    const files = await this.storageRepo.create({
+      ref_id,
+      type,
+      url,
+    });
+    return await this.storageRepo.save(files);
   }
 
   async getNotes(userId: number): Promise<Note[]> {

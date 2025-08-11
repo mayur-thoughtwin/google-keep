@@ -40,10 +40,10 @@ type Query {
 
 type Mutation {
   updateSettings(settings: UpdateSettingsInput!): GenericResponse!
-  createNote(createNoteInput: AddNotesInput!, file: Upload!): GenericResponse!
+  createNote(createNoteInput: AddNotesInput!, bg_image: Upload!, images: [Upload!]!): GenericResponse!
   updateNote(noteId: Float!, data: UpdateNotesInput!): GenericResponse!
   deleteNote(noteId: Float!): GenericResponse!
-  archiveNote(input: ArchiveNoteInput!): GenericResponse!
+  archiveNote(noteId: Float!): GenericResponse!
   restoreNote(noteId: Float!): GenericResponse!
   setReminder(noteId: Float!, reminderAt: DateTime): GenericResponse!
   emptyTrash: GenericResponse!
@@ -93,10 +93,6 @@ input UpdateNotesInput {
   latitude: Float
   longitude: Float
   deleted_at: DateTime
-}
-
-input ArchiveNoteInput {
-  noteId: Float!
 }
 
 input AddLabelInput {

@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Note } from 'src/entities/notes.entity';
 import { NotesService } from './notes.service';
 import { NotesResolver } from './notes.resolver';
+import { Storage } from 'src/entities/storage.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Note])],
+  imports: [TypeOrmModule.forFeature([Note, Storage])],
   providers: [NotesService, NotesResolver],
   exports: [NotesService],
 })

@@ -7,10 +7,11 @@ import { GenericResponse } from 'src/common/types/generic-response.type';
 import { handleResponse } from 'src/common/utils/reponse';
 import { AddLabelInput } from './label.type';
 import { LabelsService } from './label.service';
+import { Storage } from 'src/entities/storage.entity';
 
 @Resolver(() => Label)
 export class LabelsResolver {
-  constructor(private readonly labelsService: LabelsService) {} // ✅ FIXED
+  constructor(private readonly labelsService: LabelsService) {}
 
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)

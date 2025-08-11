@@ -1,85 +1,63 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
 import { Note } from 'src/entities/notes.entity';
-import {
-  AddNotesInput,
-  ArchiveNoteInput,
-  UpdateNotesInput,
-} from './notes.type';
+import { AddNotesInput, UpdateNotesInput } from './notes.type';
 import { NotesService } from './notes.service';
 import { GenericResponse } from 'src/common/types/generic-response.type';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { handleResponse } from 'src/common/utils/reponse';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
-import { createWriteStream } from 'fs';
-import { join } from 'path';
-import { Cron } from '@nestjs/schedule';
-
-
+// import { createWriteStream } from 'fs';
+// import { join } from 'path';
+import { saveUploadedFile } from 'src/common/utils/file.upload.util';
 
 @Resolver(() => Note)
 export class NotesResolver {
   constructor(private readonly notesService: NotesService) {}
 
-  // @Mutation(() => GenericResponse)
-  // @UseGuards(GraphQLJwtAuthGuard)
-  // async addNotes(
-  //   @Args('notes') notes: AddNotesInput,
-  //   @CurrentUser() user: any,
-  // ) {
-  //   try {
-  //     const created = await this.notesService.createNote(
-  //       user.userId as number,
-  //       notes,
-  //     );
-  //     return handleResponse({
-  //       success: true,
-  //       message: 'Note created',
-  //       data: created,
-  //     });
-  //   } catch (error) {
-  //     return handleResponse({
-  //       success: false,
-  //       message: 'Failed to create note',
-  //       data: error,
-  //     });
-  //   }
-  // }
-
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
   async createNote(
-    @Args('createNoteInput') createNoteInput: AddNotesInput,
-    @Args('file', { type: () => GraphQLUpload }) file: Promise<FileUpload>,
     @CurrentUser() user: any,
+    @Args('createNoteInput') createNoteInput: AddNotesInput,
+    @Args('bg_image', { type: () => GraphQLUpload })
+    bg_image: Promise<FileUpload>,
+    @Args('images', { type: () => [GraphQLUpload] })
+    images?: Promise<FileUpload>[],
   ) {
-    const { createReadStream, filename } = await file;
-    const savePath = join(process.cwd(), 'uploads', filename);
+    const savePath = await saveUploadedFile(bg_image);
 
-    await new Promise<void>((resolve, reject) => {
-      createReadStream()
-        .pipe(createWriteStream(savePath))
-        .on('finish', () => resolve())
-        .on('error', (err) => reject(err));
-    });
+    const note = await this.notesService.createNote(
+      user.userId as number,
+      createNoteInput,
+      savePath,
+    );
+    if (images?.length) {
+      for (const imagePromise of images) {
+        const imagePath = await saveUploadedFile(imagePromise);
+        console.log('imagePath:', imagePath);
+
+        await this.notesService.addFiles(note.id, 'image', imagePath);
+      }
+    }
 
     // Debug logs (optional)
     console.log('Saved:', savePath);
     console.log('User:', user);
-
-    const created = await this.notesService.createNote(user.userId as number, createNoteInput, savePath);
 
     return handleResponse({
       success: true,
       message: 'Note created and file uploaded',
       data: {
         ...createNoteInput,
-        filePath: `uploads/${filename}`,
+        filePath: `${savePath}`,
       },
     });
   }
+
   @Query(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
   async getNotes(@CurrentUser() user: any) {
@@ -170,12 +148,12 @@ export class NotesResolver {
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
   async archiveNote(
-    @Args('input') input: ArchiveNoteInput,
+    @Args('noteId') noteId: number,
     @CurrentUser() user: any,
   ): Promise<GenericResponse> {
     try {
       const updated = await this.notesService.toggleArchiveStatus(
-        input.noteId,
+        noteId,
         user.userId as number,
       );
 
