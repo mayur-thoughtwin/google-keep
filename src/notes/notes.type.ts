@@ -8,10 +8,7 @@ import {
   Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 // import { Upload, UploadScalar } from '../common/scalar/upload.scalar';
-
-
 
 @InputType()
 export class AddNotesInput {
@@ -23,7 +20,6 @@ export class AddNotesInput {
 
   // @Field(() => UploadScalar, { nullable: true })
   // file: any;
-
 
   // @Field(() => GraphQLUpload)
   // file: Promise<FileUpload>;

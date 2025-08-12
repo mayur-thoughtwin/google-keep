@@ -23,37 +23,37 @@ export class NotesResolver {
   async createNote(
     @CurrentUser() user: any,
     @Args('createNoteInput') createNoteInput: AddNotesInput,
-    @Args('bg_image', { type: () => GraphQLUpload })
-    bg_image: Promise<FileUpload>,
-    @Args('images', { type: () => [GraphQLUpload] })
+    @Args('label') label: string,
+    @Args('bg_image', { type: () => GraphQLUpload, nullable: true })
+    bg_image?: Promise<FileUpload>,
+    @Args('images', { type: () => [GraphQLUpload], nullable: true })
     images?: Promise<FileUpload>[],
   ) {
-    const savePath = await saveUploadedFile(bg_image);
+    let savePath: string | null = null;
+
+    if (bg_image) {
+      savePath = await saveUploadedFile(bg_image);
+    }
 
     const note = await this.notesService.createNote(
       user.userId as number,
       createNoteInput,
       savePath,
     );
+
     if (images?.length) {
       for (const imagePromise of images) {
         const imagePath = await saveUploadedFile(imagePromise);
-        console.log('imagePath:', imagePath);
-
         await this.notesService.addFiles(note.id, 'image', imagePath);
       }
     }
 
-    // Debug logs (optional)
-    console.log('Saved:', savePath);
-    console.log('User:', user);
-
     return handleResponse({
       success: true,
-      message: 'Note created and file uploaded',
+      message: 'Note created successfully',
       data: {
-        ...createNoteInput,
-        filePath: `${savePath}`,
+        ...note,
+        bg_image: savePath,
       },
     });
   }
@@ -83,13 +83,25 @@ export class NotesResolver {
     @Args('noteId') noteId: number,
     @Args('data') data: UpdateNotesInput,
     @CurrentUser() user: any,
+    @Args('bg_image', { type: () => GraphQLUpload, nullable: true })
+    bg_image?: Promise<FileUpload>,
+    @Args('images', { type: () => [GraphQLUpload], nullable: true })
+    images?: Promise<FileUpload>[],
   ) {
     try {
+      let savePath: string | null = null;
+
+      if (bg_image) {
+        savePath = await saveUploadedFile(bg_image);
+        data.bg_image = savePath;
+      }
+
       const updated = await this.notesService.updateNote(
         noteId,
         user.userId as number,
         data,
       );
+
       if (!updated) {
         return handleResponse({
           success: false,
@@ -97,16 +109,25 @@ export class NotesResolver {
           data: null,
         });
       }
+
+      if (images?.length) {
+        for (const imagePromise of images) {
+          const imagePath = await saveUploadedFile(imagePromise);
+          await this.notesService.addFiles(updated.id, 'image', imagePath);
+        }
+      }
+
       return handleResponse({
         success: true,
-        message: 'Note updated',
+        message: 'Note updated successfully',
         data: updated,
       });
     } catch (error) {
+      console.error(error);
       return handleResponse({
         success: false,
         message: 'Failed to update note',
-        data: error,
+        data: error.message || error,
       });
     }
   }

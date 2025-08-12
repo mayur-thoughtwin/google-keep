@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+// note.entity.ts
 import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
 import {
   Entity,
@@ -5,7 +7,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Storage } from './storage.entity';
 
 @ObjectType()
 @Entity('notes')
@@ -16,7 +20,7 @@ export class Note {
 
   @Field(() => Int)
   @Column()
-  user_id: number ;
+  user_id: number;
 
   @Field()
   @Column({ length: 100 })
@@ -30,9 +34,9 @@ export class Note {
   @Column('text', { nullable: true })
   bg_color: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @Column('text', { nullable: true })
-  bg_image: string;
+  bg_image: string | null;
 
   @Field()
   @Column()
@@ -77,4 +81,8 @@ export class Note {
   @Field()
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
+
+  @Field(() => [Storage], { nullable: true })
+  @OneToMany(() => Storage, (storage) => storage.note)
+  files: Storage[];
 }

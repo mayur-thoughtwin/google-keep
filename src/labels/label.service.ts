@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Label } from 'src/entities/labels.entity';
 import { Repository } from 'typeorm';
 import { AddLabelInput } from './label.type';
+import { NoteLabels } from 'src/entities/note.labels.entity';
 
 @Injectable()
 export class LabelsService {
   constructor(
     @InjectRepository(Label)
     private readonly labelRepo: Repository<Label>,
+    @InjectRepository(NoteLabels)
+    private readonly noteLabelRepo: Repository<NoteLabels>,
   ) {}
 
   async createLabel(userId: number, input: AddLabelInput): Promise<Label> {
@@ -56,5 +59,30 @@ export class LabelsService {
   async deleteLabel(userId: number, labelId: number): Promise<string> {
     await this.labelRepo.delete({ user_id: userId, id: labelId });
     return 'true';
+  }
+
+  async assignLabelService(userId: number, noteId: number, labelName: string) {
+    let label = await this.labelRepo.findOne({
+      where: { user_id: userId, name: labelName },
+    });
+    if (!label) {
+      label = await this.labelRepo.save({
+        user_id: userId,
+        name: labelName,
+      });
+    }
+
+    const existingLink = await this.noteLabelRepo.findOne({
+      where: { note_id: noteId, label_id: label.id },
+    });
+
+    if (!existingLink) {
+      await this.noteLabelRepo.save({
+        note_id: noteId,
+        label_id: label.id,
+      });
+    }
+
+    return true;
   }
 }

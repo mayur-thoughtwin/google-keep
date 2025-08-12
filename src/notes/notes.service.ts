@@ -39,11 +39,15 @@ export class NotesService {
       console.log(`${result.affected} notes permanently deleted`);
     }
   }
-  async createNote(userId: number, input: AddNotesInput, savePath: string) {
+  async createNote(
+    userId: number,
+    input: AddNotesInput,
+    savePath?: string | null,
+  ) {
     const note = this.noteRepo.create({
       ...input,
       user_id: userId,
-      bg_image: savePath,
+      bg_image: savePath || null,
     });
     return await this.noteRepo.save(note);
   }
@@ -57,8 +61,12 @@ export class NotesService {
     return await this.storageRepo.save(files);
   }
 
-  async getNotes(userId: number): Promise<Note[]> {
-    return this.noteRepo.find({ where: { user_id: userId } });
+  async getNotes(userId: number) {
+    return await this.noteRepo.find({
+      where: { user_id: userId },
+      relations: ['files'],
+      order: { created_at: 'DESC' },
+    });
   }
 
   async updateNote(
@@ -75,6 +83,14 @@ export class NotesService {
     const updateData = { ...data };
     updateData.is_edited = true;
     updateData.edited_at = new Date();
+    console.log('===>>>', data);
+    if (data.reminder_at) {
+      note.reminder_at = data.reminder_at;
+      note.is_reminder = true;
+    } else {
+      note.reminder_at = null;
+      note.is_reminder = false;
+    }
 
     Object.assign(note, updateData);
 

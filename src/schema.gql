@@ -16,6 +16,14 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Storage {
+  id: Int!
+  ref_id: Int!
+  type: String!
+  url: String!
+  created_at: DateTime!
+}
+
 type GenericResponse {
   success: Boolean!
   message: String!
@@ -40,8 +48,8 @@ type Query {
 
 type Mutation {
   updateSettings(settings: UpdateSettingsInput!): GenericResponse!
-  createNote(createNoteInput: AddNotesInput!, bg_image: Upload!, images: [Upload!]!): GenericResponse!
-  updateNote(noteId: Float!, data: UpdateNotesInput!): GenericResponse!
+  createNote(createNoteInput: AddNotesInput!, label: String!, bg_image: Upload, images: [Upload!]): GenericResponse!
+  updateNote(noteId: Float!, data: UpdateNotesInput!, bg_image: Upload, images: [Upload!]): GenericResponse!
   deleteNote(noteId: Float!): GenericResponse!
   archiveNote(noteId: Float!): GenericResponse!
   restoreNote(noteId: Float!): GenericResponse!
@@ -50,6 +58,7 @@ type Mutation {
   addLabel(label: AddLabelInput!): GenericResponse!
   updateLabel(labelId: Float!, data: AddLabelInput!): GenericResponse!
   deleteLabel(labelId: Float!): GenericResponse!
+  assignLabel(noteId: Float!, labelName: String!): GenericResponse!
 }
 
 input UpdateSettingsInput {

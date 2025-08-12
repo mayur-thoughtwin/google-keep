@@ -122,4 +122,32 @@ export class LabelsResolver {
       });
     }
   }
+
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async assignLabel(
+    @Args('noteId') noteId: number,
+    @Args('labelName') labelName: string,
+    @CurrentUser() user: any,
+  ) {
+    try {
+      await this.labelsService.assignLabelService(
+        user.userId as number,
+        noteId,
+        labelName,
+      );
+
+      return {
+        success: true,
+        message: 'Label assigned successfully.',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Failed to assign label.',
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
 }
