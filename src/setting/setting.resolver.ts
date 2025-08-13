@@ -5,29 +5,23 @@ import { GenericResponse } from 'src/common/types/generic-response.type';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { UseGuards } from '@nestjs/common';
 import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
-import { Settings } from 'src/entities/settings.entity';
+import { Settings, SettingsResponse } from 'src/entities/settings.entity';
 import { SettingsService } from './setting.service';
 
 @Resolver(() => Settings)
 export class SettingResolver {
   constructor(private readonly settingsService: SettingsService) {}
 
-  @Query(() => GenericResponse)
+  @Query(() => SettingsResponse)
   @UseGuards(GraphQLJwtAuthGuard)
-  getSettings(@CurrentUser() user: any) {
+  async getSettings(@CurrentUser() user: any): Promise<SettingsResponse> {
     try {
-      const result = this.settingsService.getSettings(user.userId as number);
-      return handleResponse({
-        success: true,
-        message: 'Data fetched',
-        data: result,
-      });
+      const result = await this.settingsService.getSettings(
+        user.userId as number,
+      );
+      return { settings: result  };
     } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Failed to update settings',
-        data: error,
-      });
+      throw new Error('Failed to fetch settings');
     }
   }
   @Mutation(() => GenericResponse)

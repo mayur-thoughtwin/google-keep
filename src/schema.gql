@@ -16,6 +16,22 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Settings {
+  id: Int!
+  user_id: Int!
+  is_new_item_at_bottom: Boolean!
+  is_display_rich: Boolean!
+  is_checked_item_at_bottom: Boolean!
+  is_dark_theme: Boolean!
+  is_sharing: Boolean!
+  created_at: DateTime
+  updated_at: DateTime
+}
+
+type SettingsResponse {
+  settings: Settings
+}
+
 type Storage {
   id: Int!
   ref_id: Int!
@@ -74,16 +90,16 @@ type NotesResponse {
 type Query {
   me: User
   users: [User!]!
-  getSettings: GenericResponse!
+  getSettings: SettingsResponse!
   getNotes: NotesResponse!
-  getArchiveOrTrashNotesOrReminder(type: String!): GenericResponse!
+  getArchiveOrTrashNotesOrReminder(type: String!): NotesResponse!
   searchNotes(query: String!): GenericResponse!
   getLabels: GenericResponse!
 }
 
 type Mutation {
   updateSettings(settings: UpdateSettingsInput!): GenericResponse!
-  createNote(createNoteInput: AddNotesInput!, label: String!, bg_image: Upload, images: [Upload!]): GenericResponse!
+  createNote(createNoteInput: AddNotesInput!, label: String, bg_image: Upload, images: [Upload!]): GenericResponse!
   updateNote(noteId: Float!, data: UpdateNotesInput!, bg_image: Upload, images: [Upload!]): GenericResponse!
   deleteNote(noteId: Float!): GenericResponse!
   archiveNote(noteId: Float!): GenericResponse!

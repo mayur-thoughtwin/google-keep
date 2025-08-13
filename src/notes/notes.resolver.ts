@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
@@ -23,7 +24,7 @@ export class NotesResolver {
   async createNote(
     @CurrentUser() user: any,
     @Args('createNoteInput') createNoteInput: AddNotesInput,
-    @Args('label') label: string,
+    @Args('label', { type: () => String, nullable: true }) label?: string,
     @Args('bg_image', { type: () => GraphQLUpload, nullable: true })
     bg_image?: Promise<FileUpload>,
     @Args('images', { type: () => [GraphQLUpload], nullable: true })
@@ -149,7 +150,6 @@ export class NotesResolver {
       return handleResponse({
         success: true,
         message: 'Note deleted',
-        data: null,
       });
     } catch (error) {
       return handleResponse({
@@ -253,7 +253,6 @@ export class NotesResolver {
       return handleResponse({
         success: true,
         message: reminderAt ? 'Reminder set successfully' : 'Reminder removed',
-        data: updatedNote,
       });
     } catch (error) {
       return handleResponse({
@@ -264,29 +263,22 @@ export class NotesResolver {
     }
   }
 
-  @Query(() => GenericResponse)
+  @Query(() => NotesResponse)
   @UseGuards(GraphQLJwtAuthGuard)
   async getArchiveOrTrashNotesOrReminder(
     @Args('type') type: string,
     @CurrentUser() user: any,
-  ): Promise<GenericResponse> {
+  ): Promise<NotesResponse> {
     try {
-      const notes = await this.notesService.getArchivedOrTrashedNotesOrReminder(
-        type,
-        user.userId as number,
-      );
+      const result =
+        await this.notesService.getArchivedOrTrashedNotesOrReminder(
+          type,
+          user.userId as number,
+        );
 
-      return handleResponse({
-        success: true,
-        message: `Fetched ${type} notes successfully`,
-        data: notes,
-      });
+      return { notes: result };
     } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Failed to fetch notes',
-        data: error.message ?? error,
-      });
+      throw new Error('Failed to fetch notes');
     }
   }
 
@@ -309,7 +301,6 @@ export class NotesResolver {
       return handleResponse({
         success: true,
         message: `Permanently deleted ${deletedCount} notes from trash`,
-        data: deletedCount,
       });
     } catch (error) {
       return handleResponse({

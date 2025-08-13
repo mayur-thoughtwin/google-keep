@@ -11,10 +11,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Storage } from 'src/entities/storage.entity';
 @Injectable()
 export class NotesService {
-  @Cron(CronExpression.EVERY_5_SECONDS)
-  handleCron() {
-    console.log('Called when the current second is 45', new Date());
-  }
   constructor(
     @InjectRepository(Note)
     private readonly noteRepo: Repository<Note>,
@@ -165,6 +161,7 @@ export class NotesService {
           is_archived: true,
           deleted_at: IsNull(),
         },
+        relations: ['files', 'noteLabels', 'noteLabels.label'],
         order: { updated_at: 'DESC' },
       });
     }
@@ -175,6 +172,7 @@ export class NotesService {
           user_id: userId,
           deleted_at: Not(IsNull()),
         },
+        relations: ['files', 'noteLabels', 'noteLabels.label'],
         order: { deleted_at: 'DESC' },
       });
     }
@@ -186,6 +184,7 @@ export class NotesService {
           reminder_at: Not(IsNull()),
           deleted_at: IsNull(),
         },
+        relations: ['files', 'noteLabels', 'noteLabels.label'],
         order: { reminder_at: 'ASC' },
       });
     }

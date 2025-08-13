@@ -93,6 +93,6 @@ export class Note {
 
   @Field(() => [String], { nullable: true })
   get labelNames(): string[] {
-    return this.noteLabels?.map(nl => nl.label?.name).filter(Boolean) || [];
+    return this.noteLabels?.map((nl) => nl.label?.name).filter(Boolean) || [];
   }
 }
