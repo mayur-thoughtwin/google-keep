@@ -64,7 +64,7 @@ export class NotesService {
   async getNotes(userId: number) {
     return await this.noteRepo.find({
       where: { user_id: userId },
-      relations: ['files'],
+      relations: ['files', 'noteLabels', 'noteLabels.label'],
       order: { created_at: 'DESC' },
     });
   }

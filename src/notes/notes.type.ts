@@ -1,4 +1,4 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, InputType, Int } from '@nestjs/graphql';
 import {
   IsString,
   IsOptional,
@@ -8,6 +8,8 @@ import {
   Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ObjectType } from '@nestjs/graphql';
+import { Note } from 'src/entities/notes.entity';
 // import { Upload, UploadScalar } from '../common/scalar/upload.scalar';
 
 @InputType()
@@ -175,4 +177,10 @@ export class SetReminderInput {
   @Type(() => Date)
   @IsDate()
   reminder_at?: Date | null;
+}
+
+@ObjectType()
+export class NotesResponse {
+  @Field(() => [Note])
+  notes: Note[];
 }

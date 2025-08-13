@@ -4,7 +4,7 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
 import { Note } from 'src/entities/notes.entity';
-import { AddNotesInput, UpdateNotesInput } from './notes.type';
+import { AddNotesInput, UpdateNotesInput, NotesResponse } from './notes.type';
 import { NotesService } from './notes.service';
 import { GenericResponse } from 'src/common/types/generic-response.type';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -58,22 +58,16 @@ export class NotesResolver {
     });
   }
 
-  @Query(() => GenericResponse)
+  @Query(() => NotesResponse)
   @UseGuards(GraphQLJwtAuthGuard)
   async getNotes(@CurrentUser() user: any) {
     try {
       const result = await this.notesService.getNotes(user.userId as number);
-      return handleResponse({
-        success: true,
-        message: 'Notes fetched',
-        data: result,
-      });
+      return {
+        notes: result,
+      };
     } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Failed to fetch notes',
-        data: error,
-      });
+      throw new Error('Failed to fetch notes');
     }
   }
 

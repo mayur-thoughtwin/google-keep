@@ -24,6 +24,37 @@ type Storage {
   created_at: DateTime!
 }
 
+type NoteLabels {
+  id: Int!
+  note_id: Int!
+  label_id: Int!
+  created_at: DateTime!
+  labelName: String
+}
+
+type Note {
+  id: Int!
+  user_id: Int!
+  title: String!
+  description: String!
+  bg_color: String
+  bg_image: String
+  is_archived: Boolean!
+  archived_at: DateTime
+  is_edited: Boolean!
+  edited_at: DateTime
+  is_reminder: Boolean!
+  reminder_at: DateTime
+  latitude: Float
+  longitude: Float
+  deleted_at: DateTime
+  created_at: DateTime!
+  updated_at: DateTime!
+  files: [Storage!]
+  noteLabels: [NoteLabels!]
+  labelNames: [String!]
+}
+
 type GenericResponse {
   success: Boolean!
   message: String!
@@ -36,11 +67,15 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://
 """
 scalar JSON
 
+type NotesResponse {
+  notes: [Note!]!
+}
+
 type Query {
   me: User
   users: [User!]!
   getSettings: GenericResponse!
-  getNotes: GenericResponse!
+  getNotes: NotesResponse!
   getArchiveOrTrashNotesOrReminder(type: String!): GenericResponse!
   searchNotes(query: String!): GenericResponse!
   getLabels: GenericResponse!

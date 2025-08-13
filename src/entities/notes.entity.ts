@@ -10,6 +10,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Storage } from './storage.entity';
+import { NoteLabels } from './note.labels.entity';
 
 @ObjectType()
 @Entity('notes')
@@ -85,4 +86,13 @@ export class Note {
   @Field(() => [Storage], { nullable: true })
   @OneToMany(() => Storage, (storage) => storage.note)
   files: Storage[];
+
+  @Field(() => [NoteLabels], { nullable: true })
+  @OneToMany(() => NoteLabels, (noteLabels) => noteLabels.note)
+  noteLabels: NoteLabels[];
+
+  @Field(() => [String], { nullable: true })
+  get labelNames(): string[] {
+    return this.noteLabels?.map(nl => nl.label?.name).filter(Boolean) || [];
+  }
 }
