@@ -1,7 +1,5 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-// import { GraphQLExceptionFilter } from './common/filters/graphql-exception.filter';
-// import { GlobalValidationPipe } from './common/pipes/global-validation.pipe';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import { graphqlUploadExpress } from 'graphql-upload-ts';
 
@@ -9,9 +7,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
-
-  // console.log(as)
-  // console.log(as.graphqlUploadExpress);
 
   // app.useGlobalFilters(new GraphQLExceptionFilter());
 

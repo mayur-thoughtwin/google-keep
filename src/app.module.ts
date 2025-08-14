@@ -12,7 +12,6 @@ import { AuthModule } from './auth/auth.module';
 import { SettingModule } from './setting/setting.module';
 import { NotesModule } from './notes/notes.module';
 import { LabelsModule } from './labels/label.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { ScheduleModule } from '@nestjs/schedule';
 // import { Upload, UploadScalar } from './common/scalar/upload.scalar';
 
@@ -37,10 +36,10 @@ import { ScheduleModule } from '@nestjs/schedule';
       playground: true,
       context: ({ req }) => ({ req }),
     } as any),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'uploads'),
+    //   serveRoot: '/uploads',
+    // }),
     AuthModule,
     SettingModule,
     NotesModule,

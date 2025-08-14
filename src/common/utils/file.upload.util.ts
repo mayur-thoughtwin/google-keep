@@ -1,21 +1,19 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { createWriteStream } from 'fs';
-import { join } from 'path';
 import { FileUpload } from 'graphql-upload-ts';
+import { CloudinaryService } from '../services/cloudinary.service';
 
 export async function saveUploadedFile(
   file: Promise<FileUpload>,
-  folder = 'uploads',
+  cloudinaryService: CloudinaryService,
+  folder = 'google-keep',
 ): Promise<string> {
-  const { createReadStream, filename } = await file;
-  const savePath = join(process.cwd(), folder, filename);
+  return await cloudinaryService.uploadImage(file, folder);
+}
 
-  await new Promise<void>((resolve, reject) => {
-    createReadStream()
-      .pipe(createWriteStream(savePath))
-      .on('finish', resolve)
-      .on('error', reject);
-  });
-
-  return savePath;
+export async function saveMultipleUploadedFiles(
+  files: Promise<FileUpload>[],
+  cloudinaryService: CloudinaryService,
+  folder = 'google-keep',
+): Promise<string[]> {
+  return await cloudinaryService.uploadMultipleImages(files, folder);
 }

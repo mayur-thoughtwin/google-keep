@@ -13,11 +13,15 @@ import { handleResponse } from 'src/common/utils/reponse';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 // import { createWriteStream } from 'fs';
 // import { join } from 'path';
-import { saveUploadedFile } from 'src/common/utils/file.upload.util';
+import { saveUploadedFile, saveMultipleUploadedFiles } from 'src/common/utils/file.upload.util';
+import { CloudinaryService } from 'src/common/services/cloudinary.service';
 
 @Resolver(() => Note)
 export class NotesResolver {
-  constructor(private readonly notesService: NotesService) {}
+  constructor(
+    private readonly notesService: NotesService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
@@ -33,7 +37,7 @@ export class NotesResolver {
     let savePath: string | null = null;
 
     if (bg_image) {
-      savePath = await saveUploadedFile(bg_image);
+      savePath = await saveUploadedFile(bg_image, this.cloudinaryService);
     }
 
     const note = await this.notesService.createNote(
@@ -43,9 +47,9 @@ export class NotesResolver {
     );
 
     if (images?.length) {
-      for (const imagePromise of images) {
-        const imagePath = await saveUploadedFile(imagePromise);
-        await this.notesService.addFiles(note.id, 'image', imagePath);
+      const imageUrls = await saveMultipleUploadedFiles(images, this.cloudinaryService);
+      for (const imageUrl of imageUrls) {
+        await this.notesService.addFiles(note.id, 'image', imageUrl);
       }
     }
 
@@ -87,7 +91,7 @@ export class NotesResolver {
       let savePath: string | null = null;
 
       if (bg_image) {
-        savePath = await saveUploadedFile(bg_image);
+        savePath = await saveUploadedFile(bg_image, this.cloudinaryService);
         data.bg_image = savePath;
       }
 
@@ -106,9 +110,9 @@ export class NotesResolver {
       }
 
       if (images?.length) {
-        for (const imagePromise of images) {
-          const imagePath = await saveUploadedFile(imagePromise);
-          await this.notesService.addFiles(updated.id, 'image', imagePath);
+        const imageUrls = await saveMultipleUploadedFiles(images, this.cloudinaryService);
+        for (const imageUrl of imageUrls) {
+          await this.notesService.addFiles(updated.id, 'image', imageUrl);
         }
       }
 

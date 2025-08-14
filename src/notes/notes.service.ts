@@ -5,8 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Note } from 'src/entities/notes.entity';
 import { ILike, IsNull, LessThan, Not, Repository } from 'typeorm';
 import { AddNotesInput, UpdateNotesInput } from './notes.type';
-import { createWriteStream, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Storage } from 'src/entities/storage.entity';
 @Injectable()
