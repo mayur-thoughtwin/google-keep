@@ -13,7 +13,10 @@ import { handleResponse } from 'src/common/utils/reponse';
 import { GraphQLUpload, FileUpload } from 'graphql-upload-ts';
 // import { createWriteStream } from 'fs';
 // import { join } from 'path';
-import { saveUploadedFile, saveMultipleUploadedFiles } from 'src/common/utils/file.upload.util';
+import {
+  saveUploadedFile,
+  saveMultipleUploadedFiles,
+} from 'src/common/utils/file.upload.util';
 import { CloudinaryService } from 'src/common/services/cloudinary.service';
 
 @Resolver(() => Note)
@@ -30,14 +33,17 @@ export class NotesResolver {
     @Args('createNoteInput') createNoteInput: AddNotesInput,
     @Args('label', { type: () => String, nullable: true }) label?: string,
     @Args('bg_image', { type: () => GraphQLUpload, nullable: true })
-    bg_image?: Promise<FileUpload>,
+    bg_image?: FileUpload,
     @Args('images', { type: () => [GraphQLUpload], nullable: true })
-    images?: Promise<FileUpload>[],
+    images?: FileUpload[],
   ) {
     let savePath: string | null = null;
 
     if (bg_image) {
-      savePath = await saveUploadedFile(bg_image, this.cloudinaryService);
+      savePath = await saveUploadedFile(
+        Promise.resolve(bg_image),
+        this.cloudinaryService,
+      );
     }
 
     const note = await this.notesService.createNote(
@@ -47,7 +53,11 @@ export class NotesResolver {
     );
 
     if (images?.length) {
-      const imageUrls = await saveMultipleUploadedFiles(images, this.cloudinaryService);
+      const imagePromises = images.map((img) => Promise.resolve(img));
+      const imageUrls = await saveMultipleUploadedFiles(
+        imagePromises,
+        this.cloudinaryService,
+      );
       for (const imageUrl of imageUrls) {
         await this.notesService.addFiles(note.id, 'image', imageUrl);
       }
@@ -63,18 +73,18 @@ export class NotesResolver {
     });
   }
 
-  @Query(() => NotesResponse)
-  @UseGuards(GraphQLJwtAuthGuard)
-  async getNotes(@CurrentUser() user: any) {
-    try {
-      const result = await this.notesService.getNotes(user.userId as number);
-      return {
-        notes: result,
-      };
-    } catch (error) {
-      throw new Error('Failed to fetch notes');
-    }
-  }
+  // @Query(() => NotesResponse)
+  // @UseGuards(GraphQLJwtAuthGuard)
+  // async getNotes(@CurrentUser() user: any) {
+  //   try {
+  //     const result = await this.notesService.getNotes(user.userId as number);
+  //     return {
+  //       notes: result,
+  //     };
+  //   } catch (error) {
+  //     throw new Error('Failed to fetch notes');
+  //   }
+  // }
 
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
@@ -83,15 +93,18 @@ export class NotesResolver {
     @Args('data') data: UpdateNotesInput,
     @CurrentUser() user: any,
     @Args('bg_image', { type: () => GraphQLUpload, nullable: true })
-    bg_image?: Promise<FileUpload>,
+    bg_image?: FileUpload,
     @Args('images', { type: () => [GraphQLUpload], nullable: true })
-    images?: Promise<FileUpload>[],
+    images?: FileUpload[],
   ) {
     try {
       let savePath: string | null = null;
 
       if (bg_image) {
-        savePath = await saveUploadedFile(bg_image, this.cloudinaryService);
+        savePath = await saveUploadedFile(
+          Promise.resolve(bg_image),
+          this.cloudinaryService,
+        );
         data.bg_image = savePath;
       }
 
@@ -110,7 +123,11 @@ export class NotesResolver {
       }
 
       if (images?.length) {
-        const imageUrls = await saveMultipleUploadedFiles(images, this.cloudinaryService);
+        const imagePromises = images.map((img) => Promise.resolve(img));
+        const imageUrls = await saveMultipleUploadedFiles(
+          imagePromises,
+          this.cloudinaryService,
+        );
         for (const imageUrl of imageUrls) {
           await this.notesService.addFiles(updated.id, 'image', imageUrl);
         }
@@ -133,17 +150,17 @@ export class NotesResolver {
 
   @Mutation(() => GenericResponse)
   @UseGuards(GraphQLJwtAuthGuard)
-  async deleteNote(
+  async deleteOrRestoreNote(
     @Args('noteId') noteId: number,
     @CurrentUser() user: any,
   ): Promise<GenericResponse> {
     try {
-      const success = await this.notesService.deleteNote(
+      const result = await this.notesService.deleteOrRestoreNote(
         user.userId as number,
         noteId,
       );
 
-      if (!success) {
+      if (!result) {
         return handleResponse({
           success: false,
           message: 'Note not found',
@@ -153,130 +170,135 @@ export class NotesResolver {
 
       return handleResponse({
         success: true,
-        message: 'Note deleted',
+        message:
+          result === 'deleted'
+            ? 'Note deleted successfully'
+            : 'Note restored successfully',
       });
     } catch (error) {
       return handleResponse({
         success: false,
-        message: 'Failed to delete note',
+        message: 'Failed to delete/restore note',
         data: error.message ?? error,
       });
     }
   }
 
-  @Mutation(() => GenericResponse)
-  @UseGuards(GraphQLJwtAuthGuard)
-  async archiveNote(
-    @Args('noteId') noteId: number,
-    @CurrentUser() user: any,
-  ): Promise<GenericResponse> {
-    try {
-      const updated = await this.notesService.toggleArchiveStatus(
-        noteId,
-        user.userId as number,
-      );
+  // @Mutation(() => GenericResponse)
+  // @UseGuards(GraphQLJwtAuthGuard)
+  // async archiveNote(
+  //   @Args('noteId') noteId: number,
+  //   @CurrentUser() user: any,
+  // ): Promise<GenericResponse> {
+  //   try {
+  //     const updated = await this.notesService.toggleArchiveStatus(
+  //       noteId,
+  //       user.userId as number,
+  //     );
 
-      if (!updated) {
-        return handleResponse({
-          success: false,
-          message: 'Note not found',
-          data: null,
-        });
-      }
+  //     if (!updated) {
+  //       return handleResponse({
+  //         success: false,
+  //         message: 'Note not found',
+  //         data: null,
+  //       });
+  //     }
 
-      return handleResponse({
-        success: true,
-        message: updated.is_archived ? 'Note archived' : 'Note unarchived',
-        data: updated,
-      });
-    } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Failed to toggle archive status',
-        data: error,
-      });
-    }
-  }
+  //     return handleResponse({
+  //       success: true,
+  //       message: updated.is_archived ? 'Note archived' : 'Note unarchived',
+  //       data: updated,
+  //     });
+  //   } catch (error) {
+  //     return handleResponse({
+  //       success: false,
+  //       message: 'Failed to toggle archive status',
+  //       data: error,
+  //     });
+  //   }
+  // }
 
-  @Mutation(() => GenericResponse)
-  @UseGuards(GraphQLJwtAuthGuard)
-  async restoreNote(
-    @Args('noteId') noteId: number,
-    @CurrentUser() user: any,
-  ): Promise<GenericResponse> {
-    try {
-      const success = await this.notesService.restoreNote(
-        user.userId as number,
-        noteId,
-      );
+  // @Mutation(() => GenericResponse)
+  // @UseGuards(GraphQLJwtAuthGuard)
+  // async restoreNote(
+  //   @Args('noteId') noteId: number,
+  //   @CurrentUser() user: any,
+  // ): Promise<GenericResponse> {
+  //   try {
+  //     const success = await this.notesService.restoreNote(
+  //       user.userId as number,
+  //       noteId,
+  //     );
 
-      if (!success) {
-        return handleResponse({
-          success: false,
-          message: 'Note not found or already active',
-          data: null,
-        });
-      }
+  //     if (!success) {
+  //       return handleResponse({
+  //         success: false,
+  //         message: 'Note not found or already active',
+  //         data: null,
+  //       });
+  //     }
 
-      return handleResponse({
-        success: true,
-        message: 'Note restored successfully',
-        data: null,
-      });
-    } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Failed to restore note',
-        data: error.message ?? error,
-      });
-    }
-  }
+  //     return handleResponse({
+  //       success: true,
+  //       message: 'Note restored successfully',
+  //       data: null,
+  //     });
+  //   } catch (error) {
+  //     return handleResponse({
+  //       success: false,
+  //       message: 'Failed to restore note',
+  //       data: error.message ?? error,
+  //     });
+  //   }
+  // }
 
-  @Mutation(() => GenericResponse)
-  @UseGuards(GraphQLJwtAuthGuard)
-  async setReminder(
-    @Args('noteId') noteId: number,
-    @Args('reminderAt', { type: () => Date, nullable: true }) reminderAt: Date,
-    @CurrentUser() user: any,
-  ): Promise<GenericResponse> {
-    try {
-      const updatedNote = await this.notesService.setReminder(
-        user.userId as number,
-        noteId,
-        reminderAt ?? null,
-      );
+  // @Mutation(() => GenericResponse)
+  // @UseGuards(GraphQLJwtAuthGuard)
+  // async setReminder(
+  //   @Args('noteId') noteId: number,
+  //   @Args('reminderAt', { type: () => Date, nullable: true }) reminderAt: Date,
+  //   @CurrentUser() user: any,
+  // ): Promise<GenericResponse> {
+  //   try {
+  //     const updatedNote = await this.notesService.setReminder(
+  //       user.userId as number,
+  //       noteId,
+  //       reminderAt ?? null,
+  //     );
 
-      if (!updatedNote) {
-        return handleResponse({
-          success: false,
-          message: 'Note not found or already deleted',
-          data: null,
-        });
-      }
+  //     if (!updatedNote) {
+  //       return handleResponse({
+  //         success: false,
+  //         message: 'Note not found or already deleted',
+  //         data: null,
+  //       });
+  //     }
 
-      return handleResponse({
-        success: true,
-        message: reminderAt ? 'Reminder set successfully' : 'Reminder removed',
-      });
-    } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Failed to update reminder',
-        data: error.message,
-      });
-    }
-  }
+  //     return handleResponse({
+  //       success: true,
+  //       message: reminderAt ? 'Reminder set successfully' : 'Reminder removed',
+  //     });
+  //   } catch (error) {
+  //     return handleResponse({
+  //       success: false,
+  //       message: 'Failed to update reminder',
+  //       data: error.message,
+  //     });
+  //   }
+  // }
 
   @Query(() => NotesResponse)
   @UseGuards(GraphQLJwtAuthGuard)
-  async getArchiveOrTrashNotesOrReminder(
-    @Args('type') type: string,
+  async getNotes(
+    @Args('type', { type: () => String, nullable: true }) type: string,
+    @Args('query', { type: () => String, nullable: true }) query: string,
     @CurrentUser() user: any,
   ): Promise<NotesResponse> {
     try {
       const result =
         await this.notesService.getArchivedOrTrashedNotesOrReminder(
-          type,
+          type ?? null,
+          query ?? null,
           user.userId as number,
         );
 
@@ -315,29 +337,29 @@ export class NotesResolver {
     }
   }
 
-  @Query(() => GenericResponse)
-  @UseGuards(GraphQLJwtAuthGuard)
-  async searchNotes(
-    @Args('query') query: string,
-    @CurrentUser() user: any,
-  ): Promise<GenericResponse> {
-    try {
-      const notes = await this.notesService.searchNotes(
-        user.userId as number,
-        query,
-      );
+  // @Query(() => GenericResponse)
+  // @UseGuards(GraphQLJwtAuthGuard)
+  // async searchNotes(
+  //   @Args('query') query: string,
+  //   @CurrentUser() user: any,
+  // ): Promise<GenericResponse> {
+  //   try {
+  //     const notes = await this.notesService.searchNotes(
+  //       user.userId as number,
+  //       query,
+  //     );
 
-      return handleResponse({
-        success: true,
-        message: 'Search results fetched',
-        data: notes,
-      });
-    } catch (error) {
-      return handleResponse({
-        success: false,
-        message: 'Search failed',
-        data: error.message,
-      });
-    }
-  }
+  //     return handleResponse({
+  //       success: true,
+  //       message: 'Search results fetched',
+  //       data: notes,
+  //     });
+  //   } catch (error) {
+  //     return handleResponse({
+  //       success: false,
+  //       message: 'Search failed',
+  //       data: error.message,
+  //     });
+  //   }
+  // }
 }

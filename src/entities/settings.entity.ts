@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { User } from './user.entity';
 
 @ObjectType()
 @Entity('settings')
@@ -45,6 +48,10 @@ export class Settings {
   @Field(() => Date, { nullable: true })
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
+
+  @Field(() => User, { nullable: true })
+  @OneToOne(() => User, (user) => user.settings, { onDelete: 'CASCADE' })
+  user: User;
 }
 
 @ObjectType()

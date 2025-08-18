@@ -116,7 +116,7 @@ export class UpdateNotesInput {
   @IsString()
   bg_image?: string;
 
-  @Field(() => Date, { nullable: true })
+  @Field({ nullable: true })
   @IsOptional()
   @IsBoolean()
   is_archived?: boolean;

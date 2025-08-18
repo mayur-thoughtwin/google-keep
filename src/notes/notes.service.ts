@@ -56,13 +56,13 @@ export class NotesService {
     return await this.storageRepo.save(files);
   }
 
-  async getNotes(userId: number) {
-    return await this.noteRepo.find({
-      where: { user_id: userId },
-      relations: ['files', 'noteLabels', 'noteLabels.label'],
-      order: { created_at: 'DESC' },
-    });
-  }
+  // async getNotes(userId: number) {
+  //   return await this.noteRepo.find({
+  //     where: { user_id: userId },
+  //     relations: ['files', 'noteLabels', 'noteLabels.label'],
+  //     order: { created_at: 'DESC' },
+  //   });
+  // }
 
   async updateNote(
     noteId: number,
@@ -70,7 +70,7 @@ export class NotesService {
     data: UpdateNotesInput,
   ): Promise<Note | null> {
     const note = await this.noteRepo.findOne({
-      where: { id: noteId, user_id: userId },
+      where: { id: noteId, user_id: userId, deleted_at: IsNull() },
     });
 
     if (!note) return null;
@@ -86,73 +86,91 @@ export class NotesService {
       note.reminder_at = null;
       note.is_reminder = false;
     }
+    if (data.is_archived === true) {
+      note.is_archived = true;
+      note.archived_at = new Date();
+    } else if (data.is_archived === false) {
+      note.is_archived = false;
+      note.archived_at = null;
+    }
 
     Object.assign(note, updateData);
 
     return this.noteRepo.save(note);
   }
 
-  async deleteNote(userId: number, noteId: number): Promise<boolean> {
-    const result = await this.noteRepo.update(
-      { id: noteId },
-      { deleted_at: new Date() },
-    );
-
-    if (typeof result.affected === 'number' && result.affected > 0) {
-      return true;
-    }
-
-    return false;
-  }
-
-  async restoreNote(userId: number, noteId: number): Promise<boolean> {
-    const result = await this.noteRepo.update(
-      { user_id: userId, id: noteId },
-      { deleted_at: null },
-    );
-
-    return typeof result.affected === 'number' && result.affected > 0;
-  }
-
-  async toggleArchiveStatus(
-    noteId: number,
+  async deleteOrRestoreNote(
     userId: number,
-  ): Promise<Note | null> {
+    noteId: number,
+  ): Promise<'deleted' | 'restored' | null> {
     const note = await this.noteRepo.findOne({
       where: { id: noteId, user_id: userId },
     });
+
     if (!note) return null;
-    if (note.is_archived == true) {
-      note.is_archived = false;
-      note.archived_at = null;
+
+    if (note.deleted_at) {
+      note.deleted_at = null;
+      await this.noteRepo.save(note);
+      return 'restored';
     } else {
-      note.is_archived = true;
-      note.archived_at = new Date();
+      note.deleted_at = new Date();
+      await this.noteRepo.save(note);
+      return 'deleted';
     }
-    return this.noteRepo.save(note);
   }
 
-  async setReminder(
-    userId: number,
-    noteId: number,
-    reminderAt: Date | null,
-  ): Promise<Note | null> {
-    const note = await this.noteRepo.findOne({
-      where: { id: noteId, user_id: userId, deleted_at: IsNull() },
-    });
+  // async toggleArchiveStatus(
+  //   noteId: number,
+  //   userId: number,
+  // ): Promise<Note | null> {
+  //   const note = await this.noteRepo.findOne({
+  //     where: { id: noteId, user_id: userId },
+  //   });
+  //   if (!note) return null;
+  //   if (note.is_archived == true) {
+  //     note.is_archived = false;
+  //     note.archived_at = null;
+  //   } else {
+  //     note.is_archived = true;
+  //     note.archived_at = new Date();
+  //   }
+  //   return this.noteRepo.save(note);
+  // }
 
-    if (!note) return null;
+  // async setReminder(
+  //   userId: number,
+  //   noteId: number,
+  //   reminderAt: Date | null,
+  // ): Promise<Note | null> {
+  //   const note = await this.noteRepo.findOne({
+  //     where: { id: noteId, user_id: userId, deleted_at: IsNull() },
+  //   });
 
-    note.is_reminder = !!reminderAt;
-    note.reminder_at = reminderAt;
+  //   if (!note) return null;
 
-    return await this.noteRepo.save(note);
-  }
+  //   note.is_reminder = !!reminderAt;
+  //   note.reminder_at = reminderAt;
+
+  //   return await this.noteRepo.save(note);
+  // }
 
   async getArchivedOrTrashedNotesOrReminder(
-    type: string,
+    type: string | null,
+    query: string | null,
     userId: number,
   ): Promise<Note[]> {
+    if (query) {
+      return await this.noteRepo.find({
+        where: {
+          user_id: userId,
+          deleted_at: IsNull(),
+          title: ILike(`%${query}%`),
+        },
+        relations: ['files', 'noteLabels', 'noteLabels.label'],
+        order: { updated_at: 'DESC' },
+      });
+    }
     if (type === 'archive') {
       return await this.noteRepo.find({
         where: {
@@ -175,6 +193,7 @@ export class NotesService {
         order: { deleted_at: 'DESC' },
       });
     }
+
     if (type === 'reminder') {
       return await this.noteRepo.find({
         where: {
@@ -188,7 +207,11 @@ export class NotesService {
       });
     }
 
-    throw new Error('Invalid type. Expected "archive" or "trash".');
+    return await this.noteRepo.find({
+      where: { user_id: userId },
+      relations: ['files', 'noteLabels', 'noteLabels.label'],
+      order: { created_at: 'DESC' },
+    });
   }
 
   async emptyTrash(userId: number): Promise<number> {
@@ -207,21 +230,21 @@ export class NotesService {
     return result.affected ?? 0;
   }
 
-  async searchNotes(userId: number, query: string): Promise<Note[]> {
-    return await this.noteRepo.find({
-      where: [
-        {
-          user_id: userId,
-          deleted_at: IsNull(),
-          title: ILike(`%${query}%`),
-        },
-        {
-          user_id: userId,
-          deleted_at: IsNull(),
-          description: ILike(`%${query}%`),
-        },
-      ],
-      order: { updated_at: 'DESC' },
-    });
-  }
+  // async searchNotes(userId: number, query: string): Promise<Note[]> {
+  //   return await this.noteRepo.find({
+  //     where: [
+  //       {
+  //         user_id: userId,
+  //         deleted_at: IsNull(),
+  //         title: ILike(`%${query}%`),
+  //       },
+  //       {
+  //         user_id: userId,
+  //         deleted_at: IsNull(),
+  //         description: ILike(`%${query}%`),
+  //       },
+  //     ],
+  //     order: { updated_at: 'DESC' },
+  //   });
+  // }
 }

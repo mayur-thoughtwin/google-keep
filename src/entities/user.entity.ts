@@ -3,8 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToOne,
 } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { Settings } from './settings.entity';
 
 @ObjectType()
 @Entity('users')
@@ -32,4 +34,9 @@ export class User {
   @Field(() => Date, { nullable: true })
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
+
+  @OneToOne(() => Settings, (settings) => settings.user, {
+    onDelete: 'CASCADE',
+  })
+  settings: Settings;
 }

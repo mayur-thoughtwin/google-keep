@@ -84,7 +84,7 @@ export class Note {
   updated_at: Date;
 
   @Field(() => [Storage], { nullable: true })
-  @OneToMany(() => Storage, (storage) => storage.note)
+  @OneToMany(() => Storage, (storage) => storage.note, { onDelete: 'CASCADE' })
   files: Storage[];
 
   @Field(() => [NoteLabels], { nullable: true })
