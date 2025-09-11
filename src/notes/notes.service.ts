@@ -75,17 +75,26 @@ export class NotesService {
 
     if (!note) return null;
 
+    // make a shallow copy of input
     const updateData = { ...data };
+
+    delete updateData.reminder_at;
+    delete updateData.is_reminder;
+    delete updateData.is_archived;
+
     updateData.is_edited = true;
     updateData.edited_at = new Date();
-    console.log('===>>>', data);
-    if (data.reminder_at) {
-      note.reminder_at = data.reminder_at;
-      note.is_reminder = true;
-    } else {
-      note.reminder_at = null;
-      note.is_reminder = false;
+
+    if (data.reminder_at !== undefined) {
+      if (data.reminder_at) {
+        note.reminder_at = data.reminder_at;
+        note.is_reminder = true;
+      } else {
+        note.reminder_at = null;
+        note.is_reminder = false;
+      }
     }
+
     if (data.is_archived === true) {
       note.is_archived = true;
       note.archived_at = new Date();
@@ -208,7 +217,7 @@ export class NotesService {
     }
 
     return await this.noteRepo.find({
-      where: { user_id: userId },
+      where: { user_id: userId, deleted_at: IsNull(), is_archived: false },
       relations: ['files', 'noteLabels', 'noteLabels.label'],
       order: { created_at: 'DESC' },
     });
