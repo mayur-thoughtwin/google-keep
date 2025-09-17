@@ -28,7 +28,7 @@ export class AuthController {
     const frontendUrl = process.env.FRONTEND_URL;
     if (frontendUrl) {
       // const redirectUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
-      const redirectUrl1 = `${frontendUrl}/welcome?token=${result.access_token}`;
+      const redirectUrl1 = `${frontendUrl}/home?token=${result.access_token}`;
       res.redirect(redirectUrl1);
     } else {
       // Redirect to backend success page with token
