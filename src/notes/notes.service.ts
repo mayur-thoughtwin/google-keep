@@ -239,6 +239,18 @@ export class NotesService {
     return result.affected ?? 0;
   }
 
+  async getNotesByLabelId(userId: number, labelId: number) {
+    return await this.noteRepo
+      .createQueryBuilder('note')
+      .leftJoinAndSelect('note.noteLabels', 'noteLabel')
+      .leftJoinAndSelect('noteLabel.label', 'label')
+      .leftJoinAndSelect('note.files', 'files')
+      .where('note.user_id = :userId', { userId })
+      .andWhere('note.deleted_at IS NULL')
+      .andWhere('label.id = :labelId', { labelId })
+      .orderBy('note.created_at', 'DESC')
+      .getMany();
+  }
   // async searchNotes(userId: number, query: string): Promise<Note[]> {
   //   return await this.noteRepo.find({
   //     where: [

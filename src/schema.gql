@@ -93,6 +93,7 @@ type Query {
   users: [User!]!
   getSettings: SettingsResponse!
   getNotes(type: String, query: String): NotesResponse!
+  getNotesByLabelId(labelId: Float!): NotesResponse!
   getLabels: GenericResponse!
 }
 

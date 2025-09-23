@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/unbound-method */
 import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { Param, UseGuards } from '@nestjs/common';
 import { GraphQLJwtAuthGuard } from 'src/auth/guards/graphql-jwt-auth.guard';
 import { Note } from 'src/entities/notes.entity';
 import { AddNotesInput, UpdateNotesInput, NotesResponse } from './notes.type';
@@ -362,4 +362,21 @@ export class NotesResolver {
   //     });
   //   }
   // }
+  @Query(() => NotesResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async getNotesByLabelId(
+    @Args('labelId') labelId: number,
+    @CurrentUser() user: any,
+  ): Promise<NotesResponse> {
+    try {
+      const notes = await this.notesService.getNotesByLabelId(
+        user.userId as number,
+        labelId,
+      );
+      return { notes: notes ?? [] };
+    } catch (error) {
+      console.error(error);
+      return { notes: [] };
+    }
+  }
 }
