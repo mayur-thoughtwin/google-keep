@@ -108,6 +108,15 @@ export class NotesService {
     return this.noteRepo.save(note);
   }
 
+  async removeFile(fileId: number, noteId: number) {
+    const file = await this.storageRepo.findOne({
+      where: { id: fileId, ref_id: noteId },
+    });
+    if (!file) return null;
+    await this.storageRepo.delete(fileId);
+    return file;
+  }
+
   async deleteOrRestoreNote(
     userId: number,
     noteId: number,

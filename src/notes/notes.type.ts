@@ -111,10 +111,10 @@ export class UpdateNotesInput {
   @IsString()
   bg_color?: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
-  bg_image?: string;
+  bg_image?: string | null;
 
   @Field({ nullable: true })
   @IsOptional()

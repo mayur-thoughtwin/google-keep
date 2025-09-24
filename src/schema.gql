@@ -103,6 +103,8 @@ type Mutation {
   updateNote(noteId: Float!, data: UpdateNotesInput!, bg_image: Upload, images: [Upload!]): GenericResponse!
   deleteOrRestoreNote(noteId: Float!): GenericResponse!
   emptyTrash: GenericResponse!
+  removeBgFromNote(noteId: Float!): GenericResponse!
+  removeImageFromNote(fileId: Float!, noteId: Float!): GenericResponse!
   addLabel(label: AddLabelInput!): GenericResponse!
   updateLabel(labelId: Float!, data: AddLabelInput!): GenericResponse!
   deleteLabel(labelId: Float!): GenericResponse!

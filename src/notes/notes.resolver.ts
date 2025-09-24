@@ -336,7 +336,75 @@ export class NotesResolver {
       });
     }
   }
+  // removed bg_image
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async removeBgFromNote(
+    @Args('noteId') noteId: number,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const updated = await this.notesService.updateNote(
+        noteId,
+        user.userId as number,
+        {
+          bg_image: null,
+        },
+      );
 
+      if (!updated) {
+        return handleResponse({
+          success: false,
+          message: 'Note not found',
+          data: null,
+        });
+      }
+
+      return handleResponse({
+        success: true,
+        message: 'Background image removed successfully',
+        data: updated,
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to remove background image',
+        data: error.message || error,
+      });
+    }
+  }
+
+  // remove image from storage
+  @Mutation(() => GenericResponse)
+  @UseGuards(GraphQLJwtAuthGuard)
+  async removeImageFromNote(
+    @Args('fileId') fileId: number,
+    @Args('noteId') noteId: number,
+    @CurrentUser() user: any,
+  ): Promise<GenericResponse> {
+    try {
+      const success = await this.notesService.removeFile(fileId, noteId);
+
+      if (!success) {
+        return handleResponse({
+          success: false,
+          message: 'File not found',
+          data: null,
+        });
+      }
+
+      return handleResponse({
+        success: true,
+        message: 'Image removed successfully',
+      });
+    } catch (error) {
+      return handleResponse({
+        success: false,
+        message: 'Failed to remove image',
+        data: error.message || error,
+      });
+    }
+  }
   // @Query(() => GenericResponse)
   // @UseGuards(GraphQLJwtAuthGuard)
   // async searchNotes(
